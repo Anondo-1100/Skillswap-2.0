@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { MapPin, Calendar, Award, Star, MessageSquare, Share2, Flag } from 'lucide-react';
+import { MapPin, Calendar, Award, Star, MessageSquare, Share2, Flag, Phone, Mail, Edit2, X, Check, Upload } from 'lucide-react';
 import SkillCard from '../components/skills/SkillCard';
 
 // Mock user data
@@ -8,6 +8,8 @@ const USER_DATA = {
   id: '1',
   name: 'Alex Johnson',
   username: 'alexj',
+  email: 'alex@example.com',
+  phone: '+1 (555) 123-4567',
   avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
   location: 'San Francisco, CA',
   joinedDate: 'January 2023',
@@ -57,29 +59,105 @@ const ProfilePage = () => {
   const [user, setUser] = useState(USER_DATA);
   const [activeTab, setActiveTab] = useState('teaching');
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    username: '',
+    email: '',
+    phone: '',
+    location: '',
+    bio: '',
+    avatar: ''
+  });
 
   useEffect(() => {
-    // Simulate API fetch
+    // Get user data from localStorage or use mock data
     const fetchUser = async () => {
       setIsLoading(true);
-      // In a real app, this would be an API call using the ID
-      setTimeout(() => {
-        setUser(USER_DATA);
-        setIsLoading(false);
-      }, 1000);
+      const storedUserData = localStorage.getItem('userData');
+      const userData = storedUserData ? JSON.parse(storedUserData) : USER_DATA;
+
+      setUser(userData);
+      setEditForm({
+        name: userData.name,
+        username: userData.username,
+        email: userData.email,
+        phone: userData.phone,
+        location: userData.location,
+        bio: userData.bio,
+        avatar: userData.avatar
+      });
+      setIsLoading(false);
     };
 
     fetchUser();
   }, [id]);
 
+  const handleEditSubmit = async () => {
+    const updatedUser = {
+      ...user,
+      name: editForm.name,
+      username: editForm.username,
+      email: editForm.email,
+      phone: editForm.phone,
+      location: editForm.location,
+      bio: editForm.bio,
+      avatar: editForm.avatar || user.avatar
+    };
+
+    setUser(updatedUser);
+    // Save complete user data including teachingSkills and learningSkills
+    localStorage.setItem('userData', JSON.stringify(updatedUser));
+    setIsEditing(false);
+  };
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // If we're closing the edit mode, reset form to current user data
+      setEditForm({
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        location: user.location,
+        bio: user.bio,
+      });
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEditForm(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Add new function to handle avatar change
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setEditForm(prev => ({
+          ...prev,
+          avatar: result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-7xl">
         <div className="animate-pulse">
-          <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg mb-8"></div>
-          <div className="h-8 w-1/4 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-          <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded mb-8"></div>
-          <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 mb-8 rounded-lg h-48"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 mb-4 rounded w-1/4 h-8"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 mb-8 rounded w-1/2 h-4"></div>
+          <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64"></div>
         </div>
       </div>
     );
@@ -89,108 +167,236 @@ const ProfilePage = () => {
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* Profile Header */}
       <div className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row items-center md:items-start">
-            <div className="relative mb-4 md:mb-0 md:mr-6">
-              <div className="h-32 w-32 rounded-full overflow-hidden border-4 border-white dark:border-gray-700 shadow-md">
-                <img 
-                  src={user.avatar} 
-                  alt={user.name} 
-                  className="h-full w-full object-cover"
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+          <div className="flex md:flex-row flex-col items-center md:items-start">
+            <div className="relative md:mr-6 mb-4 md:mb-0">
+              <div className="group relative shadow-md border-4 border-white dark:border-gray-700 rounded-full w-32 h-32 overflow-hidden">
+                <img
+                  src={isEditing ? editForm.avatar || user.avatar : user.avatar}
+                  alt={user.name}
+                  className="w-full h-full object-cover"
                 />
+                {isEditing && (
+                  <label
+                    htmlFor="avatar-upload"
+                    className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    <Upload size={24} className="text-white" />
+                    <input
+                      type="file"
+                      id="avatar-upload"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                    />
+                  </label>
+                )}
               </div>
               {user.verified && (
-                <div className="absolute bottom-0 right-0 h-8 w-8 bg-teal-100 dark:bg-teal-900 rounded-full border-2 border-white dark:border-gray-700 flex items-center justify-center">
+                <div className="right-0 bottom-0 absolute flex justify-center items-center bg-teal-100 dark:bg-teal-900 border-2 border-white dark:border-gray-700 rounded-full w-8 h-8">
                   <Award size={16} className="text-teal-600 dark:text-teal-400" />
                 </div>
               )}
             </div>
-            
-            <div className="flex-1 text-center md:text-left">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+
+            <div className="flex-1 md:text-left text-center">
+              <div className="flex md:flex-row flex-col md:justify-between md:items-center">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{user.name}</h1>
-                  <p className="text-gray-500 dark:text-gray-400">@{user.username}</p>
+                  {isEditing ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300 text-sm">
+                          Name
+                        </label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={editForm.name}
+                          onChange={handleEditChange}
+                          className="block bg-white dark:bg-gray-800 shadow-sm px-3 py-2 border border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300 text-sm">
+                          Username
+                        </label>
+                        <input
+                          type="text"
+                          name="username"
+                          value={editForm.username}
+                          onChange={handleEditChange}
+                          className="block bg-white dark:bg-gray-800 shadow-sm px-3 py-2 border border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300 text-sm">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={editForm.email}
+                          onChange={handleEditChange}
+                          className="block bg-white dark:bg-gray-800 shadow-sm px-3 py-2 border border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300 text-sm">
+                          Phone
+                        </label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={editForm.phone}
+                          onChange={handleEditChange}
+                          className="block bg-white dark:bg-gray-800 shadow-sm px-3 py-2 border border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300 text-sm">
+                          Location
+                        </label>
+                        <input
+                          type="text"
+                          name="location"
+                          value={editForm.location}
+                          onChange={handleEditChange}
+                          className="block bg-white dark:bg-gray-800 shadow-sm px-3 py-2 border border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300 text-sm">
+                          Bio
+                        </label>
+                        <textarea
+                          name="bio"
+                          value={editForm.bio}
+                          onChange={handleEditChange}
+                          rows={3}
+                          className="block bg-white dark:bg-gray-800 shadow-sm px-3 py-2 border border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <h1 className="font-bold text-gray-900 dark:text-white text-2xl">{user.name}</h1>
+                      <p className="text-gray-500 dark:text-gray-400">@{user.username}</p>
+                    </>
+                  )}
                 </div>
-                
-                <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-2">
-                  <button className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
-                    <MessageSquare size={16} className="mr-2" /> Message
-                  </button>
-                  <button className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <Share2 size={16} className="mr-2" /> Share Profile
-                  </button>
-                  <button className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <Flag size={16} className="mr-2" /> Report
-                  </button>
+
+                <div className="flex sm:flex-row flex-col gap-2 mt-4 md:mt-0">
+                  {isEditing ? (
+                    <>
+                      <button
+                        onClick={handleEditSubmit}
+                        className="inline-flex justify-center items-center bg-teal-600 hover:bg-teal-700 shadow-sm px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 font-medium text-white text-sm"
+                      >
+                        <Check size={16} className="mr-2" /> Save Changes
+                      </button>
+                      <button
+                        onClick={handleEditToggle}
+                        className="inline-flex justify-center items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-sm px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 font-medium text-gray-700 dark:text-gray-300 text-sm"
+                      >
+                        <X size={16} className="mr-2" /> Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={handleEditToggle}
+                        className="inline-flex justify-center items-center bg-teal-600 hover:bg-teal-700 shadow-sm px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 font-medium text-white text-sm"
+                      >
+                        <Edit2 size={16} className="mr-2" /> Edit Profile
+                      </button>
+                      <button className="inline-flex justify-center items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-sm px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 font-medium text-gray-700 dark:text-gray-300 text-sm">
+                        <MessageSquare size={16} className="mr-2" /> Message
+                      </button>
+                      <button className="inline-flex justify-center items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-sm px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 font-medium text-gray-700 dark:text-gray-300 text-sm">
+                        <Share2 size={16} className="mr-2" /> Share Profile
+                      </button>
+                      <button className="inline-flex justify-center items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-sm px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 font-medium text-gray-700 dark:text-gray-300 text-sm">
+                        <Flag size={16} className="mr-2" /> Report
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
-              
-              <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-4">
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <MapPin size={16} className="mr-1" />
-                  <span>{user.location}</span>
-                </div>
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Calendar size={16} className="mr-1" />
-                  <span>Joined {user.joinedDate}</span>
-                </div>
-                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Star size={16} className="mr-1 text-yellow-500 fill-current" />
-                  <span>4.9 (211 reviews)</span>
-                </div>
-              </div>
-              
-              <p className="mt-4 text-gray-700 dark:text-gray-300">{user.bio}</p>
+
+              {!isEditing && (
+                <>
+                  <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-4">
+                    <div className="flex items-center text-gray-600 dark:text-gray-400">
+                      <MapPin size={16} className="mr-1" />
+                      <span>{user.location}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600 dark:text-gray-400">
+                      <Calendar size={16} className="mr-1" />
+                      <span>Joined {user.joinedDate}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600 dark:text-gray-400">
+                      <Mail size={16} className="mr-1" />
+                      <span>{user.email}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600 dark:text-gray-400">
+                      <Phone size={16} className="mr-1" />
+                      <span>{user.phone}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600 dark:text-gray-400">
+                      <Star size={16} className="fill-current mr-1 text-yellow-500" />
+                      <span>4.9 (211 reviews)</span>
+                    </div>
+                  </div>
+
+                  <p className="mt-4 text-gray-700 dark:text-gray-300">{user.bio}</p>
+                </>
+              )}
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Profile Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
         {/* Tabs */}
-        <div className="border-b border-gray-200 dark:border-gray-700 mb-8">
-          <nav className="-mb-px flex space-x-8">
+        <div className="mb-8 border-gray-200 dark:border-gray-700 border-b">
+          <nav className="flex space-x-8 -mb-px">
             <button
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'teaching'
-                  ? 'border-teal-500 text-teal-600 dark:text-teal-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
-              }`}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'teaching'
+                ? 'border-teal-500 text-teal-600 dark:text-teal-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
+                }`}
               onClick={() => setActiveTab('teaching')}
             >
               Teaching ({user.teachingSkills.length})
             </button>
             <button
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'learning'
-                  ? 'border-teal-500 text-teal-600 dark:text-teal-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
-              }`}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'learning'
+                ? 'border-teal-500 text-teal-600 dark:text-teal-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
+                }`}
               onClick={() => setActiveTab('learning')}
             >
               Learning ({user.learningSkills.length})
             </button>
             <button
-              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'reviews'
-                  ? 'border-teal-500 text-teal-600 dark:text-teal-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
-              }`}
+              className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'reviews'
+                ? 'border-teal-500 text-teal-600 dark:text-teal-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
+                }`}
               onClick={() => setActiveTab('reviews')}
             >
               Reviews
             </button>
           </nav>
         </div>
-        
+
         {/* Tab content */}
         {activeTab === 'teaching' && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Skills I Can Teach</h2>
+            <h2 className="mb-6 font-bold text-gray-900 dark:text-white text-xl">Skills I Can Teach</h2>
             {user.teachingSkills.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="gap-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {user.teachingSkills.map((skill) => (
                   <SkillCard key={skill.id} skill={skill} />
                 ))}
@@ -200,12 +406,12 @@ const ProfilePage = () => {
             )}
           </div>
         )}
-        
+
         {activeTab === 'learning' && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Skills I Want to Learn</h2>
+            <h2 className="mb-6 font-bold text-gray-900 dark:text-white text-xl">Skills I Want to Learn</h2>
             {user.learningSkills.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="gap-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {user.learningSkills.map((skill) => (
                   <SkillCard key={skill.id} skill={skill} />
                 ))}
@@ -215,14 +421,14 @@ const ProfilePage = () => {
             )}
           </div>
         )}
-        
+
         {activeTab === 'reviews' && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Reviews</h2>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h2 className="mb-6 font-bold text-gray-900 dark:text-white text-xl">Reviews</h2>
+            <div className="bg-white dark:bg-gray-800 shadow-sm p-6 rounded-lg">
               <div className="flex items-center mb-4">
                 <div className="mr-4">
-                  <div className="text-5xl font-bold text-gray-900 dark:text-white">4.9</div>
+                  <div className="font-bold text-gray-900 dark:text-white text-5xl">4.9</div>
                   <div className="flex text-yellow-500">
                     <Star size={16} className="fill-current" />
                     <Star size={16} className="fill-current" />
@@ -230,57 +436,57 @@ const ProfilePage = () => {
                     <Star size={16} className="fill-current" />
                     <Star size={16} className="fill-current" />
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">211 reviews</div>
+                  <div className="text-gray-500 dark:text-gray-400 text-sm">211 reviews</div>
                 </div>
                 <div className="flex-1">
                   <div className="space-y-2">
                     <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-12">5 star</span>
-                      <div className="flex-1 h-3 bg-gray-200 dark:bg-gray-700 rounded-full mx-2">
-                        <div className="h-3 bg-yellow-500 rounded-full" style={{ width: '85%' }}></div>
+                      <span className="w-12 font-medium text-gray-600 dark:text-gray-400 text-sm">5 star</span>
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 mx-2 rounded-full h-3">
+                        <div className="bg-yellow-500 rounded-full h-3" style={{ width: '85%' }}></div>
                       </div>
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-12">85%</span>
+                      <span className="w-12 font-medium text-gray-600 dark:text-gray-400 text-sm">85%</span>
                     </div>
                     <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-12">4 star</span>
-                      <div className="flex-1 h-3 bg-gray-200 dark:bg-gray-700 rounded-full mx-2">
-                        <div className="h-3 bg-yellow-500 rounded-full" style={{ width: '10%' }}></div>
+                      <span className="w-12 font-medium text-gray-600 dark:text-gray-400 text-sm">4 star</span>
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 mx-2 rounded-full h-3">
+                        <div className="bg-yellow-500 rounded-full h-3" style={{ width: '10%' }}></div>
                       </div>
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-12">10%</span>
+                      <span className="w-12 font-medium text-gray-600 dark:text-gray-400 text-sm">10%</span>
                     </div>
                     <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-12">3 star</span>
-                      <div className="flex-1 h-3 bg-gray-200 dark:bg-gray-700 rounded-full mx-2">
-                        <div className="h-3 bg-yellow-500 rounded-full" style={{ width: '3%' }}></div>
+                      <span className="w-12 font-medium text-gray-600 dark:text-gray-400 text-sm">3 star</span>
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 mx-2 rounded-full h-3">
+                        <div className="bg-yellow-500 rounded-full h-3" style={{ width: '3%' }}></div>
                       </div>
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-12">3%</span>
+                      <span className="w-12 font-medium text-gray-600 dark:text-gray-400 text-sm">3%</span>
                     </div>
                     <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-12">2 star</span>
-                      <div className="flex-1 h-3 bg-gray-200 dark:bg-gray-700 rounded-full mx-2">
-                        <div className="h-3 bg-yellow-500 rounded-full" style={{ width: '1%' }}></div>
+                      <span className="w-12 font-medium text-gray-600 dark:text-gray-400 text-sm">2 star</span>
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 mx-2 rounded-full h-3">
+                        <div className="bg-yellow-500 rounded-full h-3" style={{ width: '1%' }}></div>
                       </div>
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-12">1%</span>
+                      <span className="w-12 font-medium text-gray-600 dark:text-gray-400 text-sm">1%</span>
                     </div>
                     <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-12">1 star</span>
-                      <div className="flex-1 h-3 bg-gray-200 dark:bg-gray-700 rounded-full mx-2">
-                        <div className="h-3 bg-yellow-500 rounded-full" style={{ width: '1%' }}></div>
+                      <span className="w-12 font-medium text-gray-600 dark:text-gray-400 text-sm">1 star</span>
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 mx-2 rounded-full h-3">
+                        <div className="bg-yellow-500 rounded-full h-3" style={{ width: '1%' }}></div>
                       </div>
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-12">1%</span>
+                      <span className="w-12 font-medium text-gray-600 dark:text-gray-400 text-sm">1%</span>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               {/* Sample Reviews */}
               <div className="space-y-6 mt-8">
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
+                <div className="pb-6 border-gray-200 dark:border-gray-700 border-b">
                   <div className="flex items-center mb-3">
-                    <img 
-                      src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg" 
-                      alt="Sarah" 
-                      className="h-10 w-10 rounded-full mr-3 object-cover"
+                    <img
+                      src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg"
+                      alt="Sarah"
+                      className="mr-3 rounded-full w-10 h-10 object-cover"
                     />
                     <div>
                       <div className="font-medium text-gray-900 dark:text-white">Sarah L.</div>
@@ -292,7 +498,7 @@ const ProfilePage = () => {
                           <Star size={14} className="fill-current" />
                           <Star size={14} className="fill-current" />
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">2 weeks ago</span>
+                        <span className="ml-2 text-gray-500 dark:text-gray-400 text-xs">2 weeks ago</span>
                       </div>
                     </div>
                   </div>
@@ -300,13 +506,13 @@ const ProfilePage = () => {
                     Alex is an amazing JavaScript teacher! He explained complex concepts in a way that was easy to understand. I went from knowing nothing to building my own web apps. Highly recommend!
                   </p>
                 </div>
-                
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
+
+                <div className="pb-6 border-gray-200 dark:border-gray-700 border-b">
                   <div className="flex items-center mb-3">
-                    <img 
-                      src="https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg" 
-                      alt="Michael" 
-                      className="h-10 w-10 rounded-full mr-3 object-cover"
+                    <img
+                      src="https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg"
+                      alt="Michael"
+                      className="mr-3 rounded-full w-10 h-10 object-cover"
                     />
                     <div>
                       <div className="font-medium text-gray-900 dark:text-white">Michael T.</div>
@@ -318,7 +524,7 @@ const ProfilePage = () => {
                           <Star size={14} className="fill-current" />
                           <Star size={14} className="fill-current" />
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">1 month ago</span>
+                        <span className="ml-2 text-gray-500 dark:text-gray-400 text-xs">1 month ago</span>
                       </div>
                     </div>
                   </div>
@@ -327,9 +533,9 @@ const ProfilePage = () => {
                   </p>
                 </div>
               </div>
-              
+
               <div className="mt-6 text-center">
-                <button className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 text-sm font-medium">
+                <button className="font-medium text-teal-600 hover:text-teal-700 dark:hover:text-teal-300 dark:text-teal-400 text-sm">
                   View all 211 reviews
                 </button>
               </div>
