@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Send, Phone, Video, MoreVertical, ChevronLeft, User } from 'lucide-react';
+import { Search, Send, Phone, Video, MoreVertical, ChevronLeft, User, Bold, Italic, Underline, Smile } from 'lucide-react';
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 
 // Mock data for chat
 const CONTACTS = [
@@ -145,11 +146,17 @@ const ChatPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredContacts, setFilteredContacts] = useState(CONTACTS);
   const [isMobileViewExpanded, setIsMobileViewExpanded] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedStyles, setSelectedStyles] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (searchTerm) {
-      const filtered = CONTACTS.filter(contact => 
+      const filtered = CONTACTS.filter(contact =>
         contact.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredContacts(filtered);
@@ -163,20 +170,41 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setNewMessage(prev => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
+  };
+
+  const applyStyle = (style: 'bold' | 'italic' | 'underline') => {
+    setSelectedStyles(prev => ({
+      ...prev,
+      [style]: !prev[style]
+    }));
+  };
+
+  const getStyledMessage = (text: string) => {
+    let styledText = text;
+    if (selectedStyles.bold) styledText = `**${styledText}**`;
+    if (selectedStyles.italic) styledText = `*${styledText}*`;
+    if (selectedStyles.underline) styledText = `_${styledText}_`;
+    return styledText;
+  };
+
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() === '') return;
-    
+
     const newMsg = {
       id: messages.length + 1,
       sender: 'me',
-      text: newMessage,
+      text: getStyledMessage(newMessage),
       timestamp: new Date().toISOString(),
       isOwn: true,
     };
-    
+
     setMessages([...messages, newMsg]);
     setNewMessage('');
+    setSelectedStyles({ bold: false, italic: false, underline: false });
   };
 
   const formatMessageTime = (timestamp: string) => {
@@ -189,7 +217,7 @@ const ChatPage = () => {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     if (date.toDateString() === today.toDateString()) {
       return 'Today';
     } else if (date.toDateString() === yesterday.toDateString()) {
@@ -201,27 +229,27 @@ const ChatPage = () => {
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <div className="h-screen flex overflow-hidden bg-white dark:bg-gray-800 shadow-xl rounded-lg">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex bg-white dark:bg-gray-800 shadow-xl rounded-lg h-screen overflow-hidden">
           {/* Contact List - Hidden on mobile when chat is expanded */}
           <div className={`w-full md:w-1/3 border-r border-gray-200 dark:border-gray-700 ${isMobileViewExpanded ? 'hidden md:block' : 'block'}`}>
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Messages</h2>
+            <div className="p-4 border-gray-200 dark:border-gray-700 border-b">
+              <h2 className="mb-4 font-bold text-gray-900 dark:text-white text-xl">Messages</h2>
               <div className="relative">
                 <input
                   type="text"
-                  className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500"
+                  className="bg-gray-50 dark:bg-gray-700 px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 focus:border-teal-500 rounded-md focus:outline-none focus:ring-teal-500 w-full text-gray-900 dark:text-white placeholder-gray-500"
                   placeholder="Search contacts..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="left-0 absolute inset-y-0 flex items-center pl-3 pointer-events-none">
                   <Search size={18} className="text-gray-400" />
                 </div>
               </div>
             </div>
-            
-            <div className="overflow-y-auto h-[calc(100vh-136px)]">
+
+            <div className="h-[calc(100vh-136px)] overflow-y-auto">
               {filteredContacts.length > 0 ? (
                 filteredContacts.map((contact) => (
                   <div
@@ -237,27 +265,27 @@ const ChatPage = () => {
                         <img
                           src={contact.avatar}
                           alt={contact.name}
-                          className="h-12 w-12 rounded-full object-cover mr-4"
+                          className="mr-4 rounded-full w-12 h-12 object-cover"
                         />
                         {contact.online && (
-                          <span className="absolute bottom-0 right-3 block h-3 w-3 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-800"></span>
+                          <span className="block right-3 bottom-0 absolute bg-green-400 rounded-full ring-2 ring-white dark:ring-gray-800 w-3 h-3"></span>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-medium text-gray-900 dark:text-white text-sm truncate">
                             {contact.name}
                           </h3>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-gray-500 dark:text-gray-400 text-xs">
                             {contact.timestamp}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                        <p className="text-gray-500 dark:text-gray-400 text-sm truncate">
                           {contact.lastMessage}
                         </p>
                       </div>
                       {contact.unread > 0 && (
-                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-teal-600 text-white text-xs font-medium">
+                        <span className="inline-flex justify-center items-center bg-teal-600 rounded-full w-5 h-5 font-medium text-white text-xs">
                           {contact.unread}
                         </span>
                       )}
@@ -265,21 +293,21 @@ const ChatPage = () => {
                   </div>
                 ))
               ) : (
-                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                <div className="p-4 text-gray-500 dark:text-gray-400 text-center">
                   No contacts found
                 </div>
               )}
             </div>
           </div>
-          
+
           {/* Chat Area - Full screen on mobile when expanded */}
           <div className={`w-full md:w-2/3 ${!isMobileViewExpanded ? 'hidden md:block' : 'block'}`}>
             {selectedContact ? (
               <>
                 {/* Chat Header */}
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="flex justify-between items-center p-4 border-gray-200 dark:border-gray-700 border-b">
                   <div className="flex items-center">
-                    <button 
+                    <button
                       className="md:hidden mr-2 text-gray-500 dark:text-gray-400"
                       onClick={() => setIsMobileViewExpanded(false)}
                     >
@@ -289,46 +317,46 @@ const ChatPage = () => {
                       <img
                         src={selectedContact.avatar}
                         alt={selectedContact.name}
-                        className="h-10 w-10 rounded-full object-cover mr-3"
+                        className="mr-3 rounded-full w-10 h-10 object-cover"
                       />
                       {selectedContact.online && (
-                        <span className="absolute bottom-0 right-2 block h-2.5 w-2.5 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-800"></span>
+                        <span className="block right-2 bottom-0 absolute bg-green-400 rounded-full ring-2 ring-white dark:ring-gray-800 w-2.5 h-2.5"></span>
                       )}
                     </div>
                     <div>
-                      <h3 className="text-base font-medium text-gray-900 dark:text-white">
+                      <h3 className="font-medium text-gray-900 dark:text-white text-base">
                         {selectedContact.name}
                       </h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-gray-500 dark:text-gray-400 text-xs">
                         {selectedContact.online ? 'Online' : 'Offline'}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <button className="hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full text-gray-500 dark:text-gray-400">
                       <Phone size={20} />
                     </button>
-                    <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <button className="hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full text-gray-500 dark:text-gray-400">
                       <Video size={20} />
                     </button>
-                    <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <button className="hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full text-gray-500 dark:text-gray-400">
                       <MoreVertical size={20} />
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Messages */}
-                <div className="h-[calc(100vh-210px)] overflow-y-auto p-4 space-y-4" id="messages-container">
+                <div className="space-y-4 p-4 h-[calc(100vh-210px)] overflow-y-auto" id="messages-container">
                   {messages.map((message, index) => {
                     // Show date separator if this is the first message or if the date changes
-                    const showDateSeparator = index === 0 || 
+                    const showDateSeparator = index === 0 ||
                       formatMessageDate(message.timestamp) !== formatMessageDate(messages[index - 1].timestamp);
-                    
+
                     return (
                       <div key={message.id}>
                         {showDateSeparator && (
                           <div className="flex justify-center my-4">
-                            <div className="px-4 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-500 dark:text-gray-400">
+                            <div className="bg-gray-100 dark:bg-gray-700 px-4 py-1 rounded-full font-medium text-gray-500 dark:text-gray-400 text-xs">
                               {formatMessageDate(message.timestamp)}
                             </div>
                           </div>
@@ -346,20 +374,59 @@ const ChatPage = () => {
                   })}
                   <div ref={messagesEndRef} />
                 </div>
-                
+
                 {/* Message Input */}
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="p-4 border-gray-200 dark:border-gray-700 border-t">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <button
+                      type="button"
+                      onClick={() => applyStyle('bold')}
+                      className={`p-2 rounded ${selectedStyles.bold ? 'bg-gray-200 dark:bg-gray-600' : ''}`}
+                    >
+                      <Bold size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyStyle('italic')}
+                      className={`p-2 rounded ${selectedStyles.italic ? 'bg-gray-200 dark:bg-gray-600' : ''}`}
+                    >
+                      <Italic size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyStyle('underline')}
+                      className={`p-2 rounded ${selectedStyles.underline ? 'bg-gray-200 dark:bg-gray-600' : ''}`}
+                    >
+                      <Underline size={18} />
+                    </button>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        className="hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded"
+                      >
+                        <Smile size={18} />
+                      </button>
+                      {showEmojiPicker && (
+                        <div className="right-0 bottom-full absolute mb-2">
+                          <EmojiPicker onEmojiClick={handleEmojiClick} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <form onSubmit={handleSendMessage} className="flex items-center">
                     <input
                       type="text"
-                      className="flex-1 border border-gray-300 dark:border-gray-600 rounded-l-md py-2 px-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500"
+                      className={`flex-1 border border-gray-300 dark:border-gray-600 rounded-l-md py-2 px-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500 ${selectedStyles.bold ? 'font-bold' : ''
+                        } ${selectedStyles.italic ? 'italic' : ''} ${selectedStyles.underline ? 'underline' : ''
+                        }`}
                       placeholder="Type a message..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                     />
                     <button
                       type="submit"
-                      className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-r-md"
+                      className="bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-r-md text-white"
                     >
                       <Send size={20} />
                     </button>
@@ -367,14 +434,14 @@ const ChatPage = () => {
                 </div>
               </>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center p-6">
-                <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+              <div className="flex flex-col justify-center items-center p-6 h-full">
+                <div className="flex justify-center items-center bg-gray-100 dark:bg-gray-700 mb-4 rounded-full w-20 h-20">
                   <User size={32} className="text-gray-400" />
                 </div>
-                <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">
+                <h3 className="mb-2 font-medium text-gray-900 dark:text-white text-xl">
                   Select a conversation
                 </h3>
-                <p className="text-gray-500 dark:text-gray-400 text-center max-w-sm">
+                <p className="max-w-sm text-gray-500 dark:text-gray-400 text-center">
                   Choose a contact from the list to start chatting or search for someone specific.
                 </p>
               </div>

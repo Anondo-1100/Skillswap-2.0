@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Calendar, Award, Star, MessageSquare, Share2, Flag, Phone, Mail, Edit2, X, Check, Upload } from 'lucide-react';
 import SkillCard from '../components/skills/SkillCard';
 
@@ -56,6 +56,7 @@ const USER_DATA = {
 
 const ProfilePage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [user, setUser] = useState(USER_DATA);
   const [activeTab, setActiveTab] = useState('teaching');
   const [isLoading, setIsLoading] = useState(true);
@@ -148,6 +149,10 @@ const ProfilePage = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleMessageClick = () => {
+    navigate('/chat', { state: { selectedUserId: user.id } });
   };
 
   if (isLoading) {
@@ -309,7 +314,10 @@ const ProfilePage = () => {
                       >
                         <Edit2 size={16} className="mr-2" /> Edit Profile
                       </button>
-                      <button className="inline-flex justify-center items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-sm px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 font-medium text-gray-700 dark:text-gray-300 text-sm">
+                      <button
+                        onClick={handleMessageClick}
+                        className="inline-flex justify-center items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-sm px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 font-medium text-gray-700 dark:text-gray-300 text-sm"
+                      >
                         <MessageSquare size={16} className="mr-2" /> Message
                       </button>
                       <button className="inline-flex justify-center items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-sm px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 font-medium text-gray-700 dark:text-gray-300 text-sm">
