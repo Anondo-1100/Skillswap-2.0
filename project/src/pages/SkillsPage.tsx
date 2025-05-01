@@ -1,98 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import SkillCard from '../components/skills/SkillCard';
-
-// Mock data - In a real app, this would come from an API
-const SKILLS_DATA = [
-  {
-    id: 1,
-    title: 'JavaScript Fundamentals',
-    description: 'Learn the core concepts of JavaScript programming language including variables, functions, and objects.',
-    category: 'programming',
-    level: 'beginner',
-    author: 'Alex Johnson',
-    authorImage: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
-    rating: 4.8,
-    reviews: 124,
-  },
-  {
-    id: 2,
-    title: 'Digital Illustration',
-    description: 'Master digital illustration techniques using popular software like Procreate and Adobe Illustrator.',
-    category: 'design',
-    level: 'intermediate',
-    author: 'Sophia Lee',
-    authorImage: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
-    rating: 4.9,
-    reviews: 89,
-  },
-  {
-    id: 3,
-    title: 'Spanish Conversation',
-    description: 'Practice conversational Spanish with a focus on everyday situations and common phrases.',
-    category: 'language',
-    level: 'beginner',
-    author: 'Miguel Rodriguez',
-    authorImage: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg',
-    rating: 4.7,
-    reviews: 56,
-  },
-  {
-    id: 4,
-    title: 'Piano for Beginners',
-    description: 'Learn to play piano starting with basic techniques, reading music, and simple songs.',
-    category: 'music',
-    level: 'beginner',
-    author: 'Emma Wilson',
-    authorImage: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg',
-    rating: 4.6,
-    reviews: 42,
-  },
-  {
-    id: 5,
-    title: 'Italian Cuisine',
-    description: 'Discover authentic Italian cooking techniques and recipes from different regions of Italy.',
-    category: 'cooking',
-    level: 'intermediate',
-    author: 'Marco Bianchi',
-    authorImage: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
-    rating: 4.9,
-    reviews: 78,
-  },
-  {
-    id: 6,
-    title: 'React Development',
-    description: 'Build modern web applications using React, Redux, and related technologies.',
-    category: 'programming',
-    level: 'advanced',
-    author: 'David Chen',
-    authorImage: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg',
-    rating: 4.8,
-    reviews: 112,
-  },
-  {
-    id: 7,
-    title: 'Yoga Basics',
-    description: 'Learn fundamental yoga poses, breathing techniques, and mindfulness practices for beginners.',
-    category: 'fitness',
-    level: 'beginner',
-    author: 'Priya Sharma',
-    authorImage: 'https://images.pexels.com/photos/1065084/pexels-photo-1065084.jpeg',
-    rating: 4.7,
-    reviews: 95,
-  },
-  {
-    id: 8,
-    title: 'Photography Composition',
-    description: 'Master the art of composition in photography to create more compelling and balanced images.',
-    category: 'photography',
-    level: 'intermediate',
-    author: 'James Wilson',
-    authorImage: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg',
-    rating: 4.8,
-    reviews: 67,
-  },
-];
+import { SKILLS_DATA } from '../data/skills';
 
 const categories = [
   'All Categories',
@@ -106,11 +15,13 @@ const categories = [
 ].map(cat => cat === 'All Categories' ? cat : cat.charAt(0).toUpperCase() + cat.slice(1));
 
 const levels = ['All Levels', 'Beginner', 'Intermediate', 'Advanced'];
+const teachingModes = ['All Modes', 'Skill Swap', 'Paid'];
 
 const SkillsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [selectedLevel, setSelectedLevel] = useState('All Levels');
+  const [selectedTeachingMode, setSelectedTeachingMode] = useState('All Modes');
   const [filteredSkills, setFilteredSkills] = useState(SKILLS_DATA);
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -124,7 +35,7 @@ const SkillsPage = () => {
   }, []);
 
   useEffect(() => {
-    // Filter skills based on search term, category, and level
+    // Filter skills based on search term, category, level, and teaching mode
     const filtered = SKILLS_DATA.filter((skill) => {
       const matchesSearch = skill.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         skill.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -135,16 +46,21 @@ const SkillsPage = () => {
       const matchesLevel = selectedLevel === 'All Levels' ||
         skill.level.toLowerCase() === selectedLevel.toLowerCase();
 
-      return matchesSearch && matchesCategory && matchesLevel;
+      const matchesTeachingMode = selectedTeachingMode === 'All Modes' ||
+        (selectedTeachingMode === 'Skill Swap' && skill.teachingMode === 'swap') ||
+        (selectedTeachingMode === 'Paid' && skill.teachingMode === 'paid');
+
+      return matchesSearch && matchesCategory && matchesLevel && matchesTeachingMode;
     });
 
     setFilteredSkills(filtered);
-  }, [searchTerm, selectedCategory, selectedLevel]);
+  }, [searchTerm, selectedCategory, selectedLevel, selectedTeachingMode]);
 
   const resetFilters = () => {
     setSearchTerm('');
     setSelectedCategory('All Categories');
     setSelectedLevel('All Levels');
+    setSelectedTeachingMode('All Modes');
   };
 
   return (
@@ -181,7 +97,7 @@ const SkillsPage = () => {
 
             {/* Applied filters - Desktop */}
             <div className="hidden md:flex items-center space-x-2">
-              {(selectedCategory !== 'All Categories' || selectedLevel !== 'All Levels' || searchTerm) && (
+              {(selectedCategory !== 'All Categories' || selectedLevel !== 'All Levels' || selectedTeachingMode !== 'All Modes' || searchTerm) && (
                 <button
                   onClick={resetFilters}
                   className="text-gray-600 hover:text-teal-600 dark:hover:text-teal-400 dark:text-gray-400 text-sm"
@@ -208,6 +124,18 @@ const SkillsPage = () => {
                   <button
                     onClick={() => setSelectedLevel('All Levels')}
                     className="ml-1 text-indigo-600 hover:text-indigo-800 dark:hover:text-indigo-200 dark:text-indigo-400"
+                  >
+                    <X size={14} />
+                  </button>
+                </span>
+              )}
+
+              {selectedTeachingMode !== 'All Modes' && (
+                <span className="inline-flex items-center bg-purple-100 dark:bg-purple-900 px-3 py-1 rounded-full font-medium text-purple-800 dark:text-purple-200 text-sm">
+                  {selectedTeachingMode}
+                  <button
+                    onClick={() => setSelectedTeachingMode('All Modes')}
+                    className="ml-1 text-purple-600 hover:text-purple-800 dark:hover:text-purple-200 dark:text-purple-400"
                   >
                     <X size={14} />
                   </button>
@@ -254,6 +182,20 @@ const SkillsPage = () => {
                 ))}
               </select>
             </div>
+
+            <div>
+              <select
+                className="block bg-white dark:bg-gray-800 shadow-sm mt-1 py-2 pr-10 pl-3 border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:outline-none focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm text-base"
+                value={selectedTeachingMode}
+                onChange={(e) => setSelectedTeachingMode(e.target.value)}
+              >
+                {teachingModes.map((mode) => (
+                  <option key={mode} value={mode}>
+                    {mode}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -289,6 +231,23 @@ const SkillsPage = () => {
                 {levels.map((level) => (
                   <option key={level} value={level}>
                     {level}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300 text-sm">
+                Teaching Mode
+              </label>
+              <select
+                className="block bg-white dark:bg-gray-800 shadow-sm py-2 pr-10 pl-3 border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:outline-none focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm text-base"
+                value={selectedTeachingMode}
+                onChange={(e) => setSelectedTeachingMode(e.target.value)}
+              >
+                {teachingModes.map((mode) => (
+                  <option key={mode} value={mode}>
+                    {mode}
                   </option>
                 ))}
               </select>

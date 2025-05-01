@@ -1,16 +1,37 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../contexts/ThemeContext';
-import { Search, Menu, X, SunMoon, MessageSquare, Bell, User, LogOut } from 'lucide-react';
+import { Menu, X, SunMoon, MessageSquare, Bell, User, LogOut } from 'lucide-react';
 
 const Header = () => {
-  const { theme, toggleTheme } = useContext(ThemeContext);
+  const { toggleTheme } = useContext(ThemeContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: "New skill match",
+      message: "Found a match for your JavaScript learning interest",
+      time: "2 hours ago",
+      isRead: false
+    },
+    {
+      id: 2,
+      title: "New review",
+      message: "Someone left a review on your Python teaching",
+      time: "1 day ago",
+      isRead: false
+    }
+  ]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userAvatar, setUserAvatar] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
+  const notificationsRef = useRef(null);
+  const notificationButtonRef = useRef(null);
+  const profileMenuRef = useRef(null);
+  const profileButtonRef = useRef(null);
 
   useEffect(() => {
     const loginStatus = localStorage.getItem('isLoggedIn') === 'true';
@@ -24,6 +45,31 @@ const Header = () => {
       }
     }
   }, [location]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isNotificationsOpen &&
+        notificationsRef.current &&
+        notificationButtonRef.current &&
+        !notificationsRef.current.contains(event.target) &&
+        !notificationButtonRef.current.contains(event.target)) {
+        setIsNotificationsOpen(false);
+      }
+
+      if (isProfileMenuOpen &&
+        profileMenuRef.current &&
+        profileButtonRef.current &&
+        !profileMenuRef.current.contains(event.target) &&
+        !profileButtonRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isNotificationsOpen, isProfileMenuOpen]);
 
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
@@ -42,6 +88,15 @@ const Header = () => {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleProfileMenu = () => setIsProfileMenuOpen(!isProfileMenuOpen);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const handleNotificationClick = () => {
+    setIsNotificationsOpen(!isNotificationsOpen);
+    if (!isNotificationsOpen) {
+      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+    }
+  };
 
   return (
     <header className="top-0 z-50 sticky bg-white/80 dark:bg-gray-900/90 shadow-sm backdrop-blur-md">
@@ -85,14 +140,63 @@ const Header = () => {
                 >
                   <MessageSquare size={20} />
                 </Link>
-                <Link
-                  to="/notifications"
-                  className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
-                >
-                  <Bell size={20} />
-                </Link>
+                <div className="relative">
+                  <button
+                    ref={notificationButtonRef}
+                    onClick={handleNotificationClick}
+                    className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
+                  >
+                    <Bell size={20} />
+                    {unreadCount > 0 && (
+                      <span className="-top-1 -right-1 absolute flex justify-center items-center bg-red-500 rounded-full w-5 h-5 text-white text-xs">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {isNotificationsOpen && (
+                    <div
+                      ref={notificationsRef}
+                      className="right-0 z-50 absolute bg-white dark:bg-gray-800 ring-opacity-5 shadow-lg mt-2 rounded-md focus:outline-none ring-1 ring-black w-80"
+                    >
+                      <div className="p-4 border-gray-200 dark:border-gray-700 border-b">
+                        <h3 className="font-medium text-gray-900 dark:text-white text-lg">Notifications</h3>
+                      </div>
+                      <div className="max-h-96 overflow-y-auto">
+                        {notifications.length > 0 ? (
+                          notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className={`p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 ${!notification.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                                }`}
+                            >
+                              <p className="font-medium text-gray-900 dark:text-white">{notification.title}</p>
+                              <p className="text-gray-600 dark:text-gray-400 text-sm">{notification.message}</p>
+                              <p className="mt-1 text-gray-500 dark:text-gray-500 text-xs">{notification.time}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-4 text-gray-500 dark:text-gray-400 text-center">
+                            No notifications
+                          </div>
+                        )}
+                      </div>
+                      {notifications.length > 0 && (
+                        <div className="p-4 border-gray-200 dark:border-gray-700 border-t">
+                          <button
+                            onClick={() => setNotifications([])}
+                            className="text-teal-600 hover:text-teal-700 dark:hover:text-teal-300 dark:text-teal-400 text-sm"
+                          >
+                            Clear all
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <div className="relative ml-2">
                   <button
+                    ref={profileButtonRef}
                     onClick={toggleProfileMenu}
                     className="flex items-center hover:bg-gray-100 dark:hover:bg-gray-800 p-1 rounded-full transition-colors"
                   >
@@ -104,7 +208,10 @@ const Header = () => {
                   </button>
 
                   {isProfileMenuOpen && (
-                    <div className="right-0 absolute bg-white dark:bg-gray-800 ring-opacity-5 shadow-lg mt-2 rounded-md ring-1 ring-black w-48">
+                    <div
+                      ref={profileMenuRef}
+                      className="right-0 absolute bg-white dark:bg-gray-800 ring-opacity-5 shadow-lg mt-2 rounded-md ring-1 ring-black w-48"
+                    >
                       <div className="py-1">
                         <Link
                           to="/profile/1"

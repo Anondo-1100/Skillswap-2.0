@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { Star, Repeat, DollarSign } from 'lucide-react';
 
 interface SkillProps {
   skill: {
@@ -12,13 +12,14 @@ interface SkillProps {
     authorImage: string;
     rating: number;
     reviews: number;
+    price?: number;
+    teachingMode: 'swap' | 'paid';
   };
 }
 
 const SkillCard = ({ skill }: SkillProps) => {
-  // Function to determine the badge color based on level
   const getLevelBadgeColor = (level: string) => {
-    switch(level.toLowerCase()) {
+    switch (level.toLowerCase()) {
       case 'beginner':
         return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
       case 'intermediate':
@@ -30,43 +31,59 @@ const SkillCard = ({ skill }: SkillProps) => {
     }
   };
 
+  const getTeachingModeBadge = () => {
+    if (skill.teachingMode === 'swap') {
+      return (
+        <span className="flex items-center bg-blue-100 dark:bg-blue-900 px-2.5 py-0.5 rounded-full font-medium text-blue-800 dark:text-blue-200 text-xs">
+          <Repeat size={12} className="mr-1" />
+          Skill Swap
+        </span>
+      );
+    } else {
+      return (
+        <span className="flex items-center bg-purple-100 dark:bg-purple-900 px-2.5 py-0.5 rounded-full font-medium text-purple-800 dark:text-purple-200 text-xs">
+          <DollarSign size={12} className="mr-1" />
+          ${skill.price}/hour
+        </span>
+      );
+    }
+  };
+
   return (
     <Link
       to={`/skills/${skill.id}`}
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full"
+      className="flex flex-col bg-white dark:bg-gray-800 shadow-sm hover:shadow-md rounded-lg h-full overflow-hidden transition-shadow"
     >
-      <div className="p-6 flex-grow flex flex-col">
-        <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col flex-grow p-6">
+        <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             <img
               src={skill.authorImage}
               alt={skill.author}
-              className="h-10 w-10 rounded-full mr-3 object-cover"
+              className="mr-3 rounded-full w-10 h-10 object-cover"
             />
-            <span className="text-sm font-medium text-gray-900 dark:text-white">{skill.author}</span>
+            <span className="font-medium text-gray-900 dark:text-white text-sm">{skill.author}</span>
           </div>
           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLevelBadgeColor(skill.level)}`}>
             {skill.level}
           </span>
         </div>
-        
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+
+        <h3 className="mb-2 font-semibold text-gray-900 dark:group-hover:text-teal-400 dark:text-white group-hover:text-teal-600 text-lg transition-colors">
           {skill.title}
         </h3>
-        
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 flex-grow line-clamp-3">
+
+        <p className="flex-grow mb-4 text-gray-600 dark:text-gray-400 text-sm line-clamp-3">
           {skill.description}
         </p>
-        
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
+
+        <div className="flex justify-between items-center mt-auto pt-4 border-gray-100 dark:border-gray-700 border-t">
           <div className="flex items-center">
-            <Star size={16} className="text-yellow-500 fill-current" />
-            <span className="ml-1 text-sm font-medium text-gray-900 dark:text-white">{skill.rating}</span>
-            <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">({skill.reviews})</span>
+            <Star size={16} className="fill-current text-yellow-500" />
+            <span className="ml-1 font-medium text-gray-900 dark:text-white text-sm">{skill.rating}</span>
+            <span className="ml-1 text-gray-500 dark:text-gray-400 text-xs">({skill.reviews})</span>
           </div>
-          <span className="text-xs uppercase font-medium text-gray-500 dark:text-gray-400">
-            {skill.category}
-          </span>
+          {getTeachingModeBadge()}
         </div>
       </div>
     </Link>
