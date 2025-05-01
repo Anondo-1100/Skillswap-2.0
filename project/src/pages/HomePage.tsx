@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Users, Trophy, Search, ArrowUpRight } from 'lucide-react';
+import { ArrowRight, Users, Trophy, Search, ArrowUpRight } from 'lucide-react';
 import CategoryCard from '../components/skills/CategoryCard';
 import FeaturedSkillCard from '../components/skills/FeaturedSkillCard';
 import TestimonialCard from '../components/home/TestimonialCard';
@@ -11,7 +11,7 @@ const HomePage = () => {
   useEffect(() => {
     setIsVisible(true);
     // Scroll to top when component mounts
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const categories = [

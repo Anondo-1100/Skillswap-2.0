@@ -1,30 +1,47 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, SlidersHorizontal, X } from 'lucide-react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import SkillCard from '../components/skills/SkillCard';
 
+interface Skill {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  level: string;
+  author: string;
+  authorImage: string;
+  rating: number;
+  reviews: number;
+  teachingMode: 'swap' | 'paid';
+  price?: number;
+}
+
 // Mock data - In a real app, this would come from an API
-const ALL_SKILLS_DATA = [
+const ALL_SKILLS_DATA: Skill[] = [
   {
     id: 1,
     title: 'JavaScript Fundamentals',
-    description: 'Learn the core concepts of JavaScript programming language including variables, functions, and objects.',
+    description: 'Learn the core concepts of JavaScript programming language.',
     category: 'programming',
     level: 'beginner',
     author: 'Alex Johnson',
     authorImage: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
     rating: 4.8,
     reviews: 124,
+    teachingMode: 'swap'
   },
   {
     id: 2,
     title: 'Digital Illustration',
-    description: 'Master digital illustration techniques using popular software like Procreate and Adobe Illustrator.',
+    description: 'Master digital illustration techniques.',
     category: 'design',
     level: 'intermediate',
     author: 'Sophia Lee',
     authorImage: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
     rating: 4.9,
     reviews: 89,
+    teachingMode: 'paid',
+    price: 45
   },
   {
     id: 3,
@@ -36,6 +53,7 @@ const ALL_SKILLS_DATA = [
     authorImage: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg',
     rating: 4.7,
     reviews: 56,
+    teachingMode: 'swap'
   },
   {
     id: 4,
@@ -47,6 +65,8 @@ const ALL_SKILLS_DATA = [
     authorImage: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg',
     rating: 4.6,
     reviews: 42,
+    teachingMode: 'paid',
+    price: 35
   },
   {
     id: 5,
@@ -58,6 +78,7 @@ const ALL_SKILLS_DATA = [
     authorImage: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
     rating: 4.9,
     reviews: 78,
+    teachingMode: 'swap'
   },
   {
     id: 6,
@@ -69,6 +90,8 @@ const ALL_SKILLS_DATA = [
     authorImage: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg',
     rating: 4.8,
     reviews: 112,
+    teachingMode: 'paid',
+    price: 60
   },
   {
     id: 7,
@@ -80,6 +103,7 @@ const ALL_SKILLS_DATA = [
     authorImage: 'https://images.pexels.com/photos/1065084/pexels-photo-1065084.jpeg',
     rating: 4.7,
     reviews: 95,
+    teachingMode: 'swap'
   },
   {
     id: 8,
@@ -91,6 +115,8 @@ const ALL_SKILLS_DATA = [
     authorImage: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg',
     rating: 4.8,
     reviews: 67,
+    teachingMode: 'paid',
+    price: 40
   },
   {
     id: 9,
@@ -102,6 +128,7 @@ const ALL_SKILLS_DATA = [
     authorImage: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg',
     rating: 4.6,
     reviews: 84,
+    teachingMode: 'swap'
   },
   {
     id: 10,
@@ -113,6 +140,8 @@ const ALL_SKILLS_DATA = [
     authorImage: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg',
     rating: 4.9,
     reviews: 156,
+    teachingMode: 'paid',
+    price: 55
   },
   {
     id: 11,
@@ -124,6 +153,7 @@ const ALL_SKILLS_DATA = [
     authorImage: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg',
     rating: 4.8,
     reviews: 112,
+    teachingMode: 'swap'
   },
   {
     id: 12,
@@ -135,6 +165,8 @@ const ALL_SKILLS_DATA = [
     authorImage: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
     rating: 4.7,
     reviews: 93,
+    teachingMode: 'paid',
+    price: 35
   },
 ];
 
@@ -159,7 +191,7 @@ const SearchPage = () => {
     level: 'All Levels',
     minRating: 0,
   });
-  const [filteredSkills, setFilteredSkills] = useState(ALL_SKILLS_DATA);
+  const [filteredSkills, setFilteredSkills] = useState<Skill[]>(ALL_SKILLS_DATA);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -173,7 +205,7 @@ const SearchPage = () => {
 
   useEffect(() => {
     // Scroll to top when component mounts
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   useEffect(() => {
@@ -197,10 +229,10 @@ const SearchPage = () => {
   }, [searchTerm, filters]);
 
   const handleFilterChange = (name: string, value: string | number) => {
-    setFilters({
-      ...filters,
+    setFilters(prev => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   const resetFilters = () => {
@@ -441,56 +473,13 @@ const SearchPage = () => {
           </div>
         ) : filteredSkills.length > 0 ? (
           <div className="gap-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredSkills.map((skill) => (
+            {filteredSkills.map((skill: Skill) => (
               <SkillCard key={skill.id} skill={skill} />
             ))}
           </div>
         ) : (
           <div className="bg-white dark:bg-gray-800 shadow-sm p-8 rounded-lg text-center">
-            <div className="inline-flex justify-center items-center bg-gray-100 dark:bg-gray-700 mb-4 rounded-full w-16 h-16">
-              <Search size={24} className="text-gray-500 dark:text-gray-400" />
-            </div>
-            <h3 className="mb-2 font-medium text-gray-900 dark:text-white text-lg">No results found</h3>
-            <p className="mb-6 text-gray-500 dark:text-gray-400">
-              We couldn't find any skills matching your search criteria. Try adjusting your filters or search query.
-            </p>
-            <button
-              onClick={resetFilters}
-              className="inline-flex items-center bg-teal-600 hover:bg-teal-700 shadow-sm px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 font-medium text-white text-sm"
-            >
-              Clear all filters
-            </button>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {filteredSkills.length > 0 && (
-          <div className="flex justify-center mt-8">
-            <nav className="inline-flex -space-x-px shadow-sm rounded-md" aria-label="Pagination">
-              <a href="#" className="inline-flex relative items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md font-medium text-gray-500 dark:text-gray-400 text-sm">
-                <span className="sr-only">Previous</span>
-                &laquo;
-              </a>
-              <a href="#" className="inline-flex relative items-center bg-teal-600 px-4 py-2 border border-gray-300 dark:border-gray-600 font-medium text-white text-sm">
-                1
-              </a>
-              <a href="#" className="inline-flex relative items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 border border-gray-300 dark:border-gray-600 font-medium text-gray-700 dark:text-gray-300 text-sm">
-                2
-              </a>
-              <a href="#" className="inline-flex relative items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 border border-gray-300 dark:border-gray-600 font-medium text-gray-700 dark:text-gray-300 text-sm">
-                3
-              </a>
-              <span className="inline-flex relative items-center bg-white dark:bg-gray-700 px-4 py-2 border border-gray-300 dark:border-gray-600 font-medium text-gray-700 dark:text-gray-300 text-sm">
-                ...
-              </span>
-              <a href="#" className="inline-flex relative items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 border border-gray-300 dark:border-gray-600 font-medium text-gray-700 dark:text-gray-300 text-sm">
-                8
-              </a>
-              <a href="#" className="inline-flex relative items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-r-md font-medium text-gray-500 dark:text-gray-400 text-sm">
-                <span className="sr-only">Next</span>
-                &raquo;
-              </a>
-            </nav>
+            <p className="text-gray-600 dark:text-gray-400">No results found</p>
           </div>
         )}
       </div>

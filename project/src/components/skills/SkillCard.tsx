@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Star, Repeat, DollarSign } from 'lucide-react';
 
-interface SkillProps {
+interface SkillCardProps {
   skill: {
     id: number;
     title: string;
@@ -12,12 +12,12 @@ interface SkillProps {
     authorImage: string;
     rating: number;
     reviews: number;
-    price?: number;
     teachingMode: 'swap' | 'paid';
+    price?: number;
   };
 }
 
-const SkillCard = ({ skill }: SkillProps) => {
+const SkillCard = ({ skill }: SkillCardProps) => {
   const getLevelBadgeColor = (level: string) => {
     switch (level.toLowerCase()) {
       case 'beginner':

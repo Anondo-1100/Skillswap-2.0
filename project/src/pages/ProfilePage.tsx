@@ -3,8 +3,37 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Calendar, Award, Star, MessageSquare, Share2, Flag, Phone, Mail, Edit2, X, Check, Upload } from 'lucide-react';
 import SkillCard from '../components/skills/SkillCard';
 
+interface Skill {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  level: string;
+  author: string;
+  authorImage: string;
+  rating: number;
+  reviews: number;
+  teachingMode: 'swap' | 'paid';
+  price?: number;
+}
+
+interface UserData {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  phone: string;
+  avatar: string;
+  location: string;
+  joinedDate: string;
+  verified: boolean;
+  bio: string;
+  teachingSkills: Skill[];
+  learningSkills: Skill[];
+}
+
 // Mock user data
-const USER_DATA = {
+const USER_DATA: UserData = {
   id: '1',
   name: 'Alex Johnson',
   username: 'alexj',
@@ -26,6 +55,7 @@ const USER_DATA = {
       authorImage: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
       rating: 4.8,
       reviews: 124,
+      teachingMode: 'swap'
     },
     {
       id: 2,
@@ -37,7 +67,9 @@ const USER_DATA = {
       authorImage: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
       rating: 4.9,
       reviews: 87,
-    },
+      teachingMode: 'paid',
+      price: 50
+    }
   ],
   learningSkills: [
     {
@@ -50,8 +82,9 @@ const USER_DATA = {
       authorImage: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
       rating: 0,
       reviews: 0,
-    },
-  ],
+      teachingMode: 'swap'
+    }
+  ]
 };
 
 const ProfilePage = () => {
@@ -77,7 +110,6 @@ const ProfilePage = () => {
       setIsLoading(true);
       const storedUserData = localStorage.getItem('userData');
       const userData = storedUserData ? JSON.parse(storedUserData) : USER_DATA;
-
       setUser(userData);
       setEditForm({
         name: userData.name,
@@ -92,6 +124,9 @@ const ProfilePage = () => {
     };
 
     fetchUser();
+    
+    // Scroll to top when component mounts with smooth behavior
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [id]);
 
   const handleEditSubmit = async () => {

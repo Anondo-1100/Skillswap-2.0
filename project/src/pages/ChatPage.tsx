@@ -166,9 +166,14 @@ const ChatPage = () => {
   }, [searchTerm]);
 
   useEffect(() => {
-    // Scroll to bottom when messages change
+    // Scroll to bottom when messages change with smooth behavior
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    // Scroll to top when component mounts with smooth behavior
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     setNewMessage(prev => prev + emojiData.emoji);
