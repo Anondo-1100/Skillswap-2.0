@@ -1,14 +1,23 @@
-import { useState, useContext, useEffect, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ThemeContext } from '../../contexts/ThemeContext';
-import { Menu, X, SunMoon, MessageSquare, Bell, User, LogOut } from 'lucide-react';
+import { useState, useContext, useEffect, useRef
+} from 'react';
+import { Link, useLocation, useNavigate
+} from 'react-router-dom';
+import { ThemeContext
+} from '../../contexts/ThemeContext';
+import { Menu, X, SunMoon, MessageSquare, Bell, User, LogOut, Wallet
+} from 'lucide-react';
 
 const Header = () => {
-  const { toggleTheme } = useContext(ThemeContext);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
+  const { toggleTheme
+  } = useContext(ThemeContext);
+  const [isMenuOpen, setIsMenuOpen
+  ] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen
+  ] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen
+  ] = useState(false);
+  const [notifications, setNotifications
+  ] = useState([
     {
       id: 1,
       title: "New skill match",
@@ -24,8 +33,10 @@ const Header = () => {
       isRead: false
     }
   ]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userAvatar, setUserAvatar] = useState('');
+  const [isLoggedIn, setIsLoggedIn
+  ] = useState(false);
+  const [userAvatar, setUserAvatar
+  ] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
   const notificationsRef = useRef(null);
@@ -40,11 +51,14 @@ const Header = () => {
     if (loginStatus) {
       const userData = localStorage.getItem('userData');
       if (userData) {
-        const { avatar } = JSON.parse(userData);
+        const { avatar
+        } = JSON.parse(userData);
         setUserAvatar(avatar);
       }
     }
-  }, [location]);
+  },
+  [location
+  ]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -69,7 +83,9 @@ const Header = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isNotificationsOpen, isProfileMenuOpen]);
+  },
+  [isNotificationsOpen, isProfileMenuOpen
+  ]);
 
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
@@ -81,9 +97,12 @@ const Header = () => {
   };
 
   const navigation = [
-    { name: 'Home', path: '/' },
-    { name: 'Explore Skills', path: '/skills' },
-    { name: 'Search', path: '/search' },
+    { name: 'Home', path: '/'
+    },
+    { name: 'Explore Skills', path: '/skills'
+    },
+    { name: 'Search', path: '/search'
+    },
   ];
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -94,7 +113,8 @@ const Header = () => {
   const handleNotificationClick = () => {
     setIsNotificationsOpen(!isNotificationsOpen);
     if (!isNotificationsOpen) {
-      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+      setNotifications(notifications.map(n => ({ ...n, isRead: true
+      })));
     }
   };
 
@@ -110,26 +130,34 @@ const Header = () => {
             <nav className="hidden md:flex md:space-x-8 md:ml-8">
               {navigation.map((item) => (
                 <Link
-                  key={item.name}
-                  to={item.path}
+                  key={item.name
+    }
+                  to={item.path
+    }
                   className={`${location.pathname === item.path
                     ? 'text-teal-600 dark:text-teal-400'
                     : 'text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400'
-                    } inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors`}
+      } inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors`
+    }
                 >
-                  {item.name}
+                  {item.name
+    }
                 </Link>
-              ))}
+              ))
+  }
             </nav>
           </div>
 
           <div className="flex items-center">
             <button
-              onClick={toggleTheme}
+              onClick={toggleTheme
+  }
               className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
               aria-label="Toggle theme"
             >
-              <SunMoon size={20} />
+              <SunMoon size={
+    20
+  } />
             </button>
 
             {isLoggedIn ? (
@@ -138,25 +166,34 @@ const Header = () => {
                   to="/messages"
                   className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
                 >
-                  <MessageSquare size={20} />
+                  <MessageSquare size={
+      20
+    } />
                 </Link>
                 <div className="relative">
                   <button
-                    ref={notificationButtonRef}
-                    onClick={handleNotificationClick}
+                    ref={notificationButtonRef
+    }
+                    onClick={handleNotificationClick
+    }
                     className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
                   >
-                    <Bell size={20} />
+                    <Bell size={
+      20
+    } />
                     {unreadCount > 0 && (
                       <span className="-top-1 -right-1 absolute flex justify-center items-center bg-red-500 rounded-full w-5 h-5 text-white text-xs">
-                        {unreadCount}
+                        {unreadCount
+      }
                       </span>
-                    )}
+                    )
+    }
                   </button>
 
                   {isNotificationsOpen && (
                     <div
-                      ref={notificationsRef}
+                      ref={notificationsRef
+      }
                       className="right-0 z-50 absolute bg-white dark:bg-gray-800 ring-opacity-5 shadow-lg mt-2 rounded-md focus:outline-none ring-1 ring-black w-80"
                     >
                       <div className="p-4 border-gray-200 dark:border-gray-700 border-b">
@@ -166,42 +203,54 @@ const Header = () => {
                         {notifications.length > 0 ? (
                           notifications.map((notification) => (
                             <div
-                              key={notification.id}
+                              key={notification.id
+        }
                               className={`p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 ${!notification.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-                                }`}
+          }`
+        }
                             >
-                              <p className="font-medium text-gray-900 dark:text-white">{notification.title}</p>
-                              <p className="text-gray-600 dark:text-gray-400 text-sm">{notification.message}</p>
-                              <p className="mt-1 text-gray-500 dark:text-gray-500 text-xs">{notification.time}</p>
+                              <p className="font-medium text-gray-900 dark:text-white">{notification.title
+        }</p>
+                              <p className="text-gray-600 dark:text-gray-400 text-sm">{notification.message
+        }</p>
+                              <p className="mt-1 text-gray-500 dark:text-gray-500 text-xs">{notification.time
+        }</p>
                             </div>
                           ))
                         ) : (
                           <div className="p-4 text-gray-500 dark:text-gray-400 text-center">
                             No notifications
                           </div>
-                        )}
+                        )
+      }
                       </div>
                       {notifications.length > 0 && (
                         <div className="p-4 border-gray-200 dark:border-gray-700 border-t">
                           <button
-                            onClick={() => setNotifications([])}
+                            onClick={() => setNotifications([])
+        }
                             className="text-teal-600 hover:text-teal-700 dark:hover:text-teal-300 dark:text-teal-400 text-sm"
                           >
                             Clear all
                           </button>
                         </div>
-                      )}
+                      )
+      }
                     </div>
-                  )}
+                  )
+    }
                 </div>
                 <div className="relative ml-2">
                   <button
-                    ref={profileButtonRef}
-                    onClick={toggleProfileMenu}
+                    ref={profileButtonRef
+    }
+                    onClick={toggleProfileMenu
+    }
                     className="flex items-center hover:bg-gray-100 dark:hover:bg-gray-800 p-1 rounded-full transition-colors"
                   >
                     <img
-                      src={userAvatar || "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg"}
+                      src={userAvatar || "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg"
+    }
                       alt="Profile"
                       className="rounded-full w-8 h-8 object-cover"
                     />
@@ -209,31 +258,50 @@ const Header = () => {
 
                   {isProfileMenuOpen && (
                     <div
-                      ref={profileMenuRef}
+                      ref={profileMenuRef
+      }
                       className="right-0 absolute bg-white dark:bg-gray-800 ring-opacity-5 shadow-lg mt-2 rounded-md ring-1 ring-black w-48"
                     >
                       <div className="py-1">
                         <Link
                           to="/profile/1"
                           className="block hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 text-gray-700 dark:text-gray-300 text-sm"
-                          onClick={() => setIsProfileMenuOpen(false)}
+                          onClick={() => setIsProfileMenuOpen(false)
+      }
                         >
-                          <User size={16} className="inline mr-2" />
+                          <User size={
+        16
+      } className="inline mr-2" />
                           Profile
+                        </Link>
+                        <Link
+                          to="/wallet"
+                          className="block hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 text-gray-700 dark:text-gray-300 text-sm"
+                          onClick={() => setIsProfileMenuOpen(false)
+      }
+                        >
+                          <Wallet size={
+        16
+      } className="inline mr-2" />
+                          Wallet
                         </Link>
                         <button
                           onClick={() => {
                             handleLogout();
                             setIsProfileMenuOpen(false);
-                          }}
+        }
+      }
                           className="block hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 w-full text-gray-700 dark:text-gray-300 text-sm text-left"
                         >
-                          <LogOut size={16} className="inline mr-2" />
+                          <LogOut size={
+        16
+      } className="inline mr-2" />
                           Sign out
                         </button>
                       </div>
                     </div>
-                  )}
+                  )
+    }
                 </div>
               </>
             ) : (
@@ -251,51 +319,74 @@ const Header = () => {
                   Sign up
                 </Link>
               </div>
-            )}
+            )
+  }
 
             <button
               className="md:hidden hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
-              onClick={toggleMenu}
+              onClick={toggleMenu
+  }
               aria-label="Toggle menu"
             >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMenuOpen ? <X size={
+      24
+    } /> : <Menu size={
+      24
+    } />
+  }
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      { /* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-white dark:bg-gray-900 shadow-lg">
           <div className="space-y-1 px-2 sm:px-3 pt-2 pb-3">
             {navigation.map((item) => (
               <Link
-                key={item.name}
-                to={item.path}
+                key={item.name
+      }
+                to={item.path
+      }
                 className={`${location.pathname === item.path
                   ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/60'
-                  } block px-3 py-2 rounded-md text-base font-medium transition-colors`}
-                onClick={() => setIsMenuOpen(false)}
+        } block px-3 py-2 rounded-md text-base font-medium transition-colors`
+      }
+                onClick={() => setIsMenuOpen(false)
+      }
               >
-                {item.name}
+                {item.name
+      }
               </Link>
-            ))}
+            ))
+    }
 
             {isLoggedIn ? (
               <>
                 <Link
                   to="/profile/1"
                   className="block hover:bg-gray-50 dark:hover:bg-gray-800/60 px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 text-base transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => setIsMenuOpen(false)
+      }
                 >
                   Profile
+                </Link>
+                <Link
+                  to="/wallet"
+                  className="block hover:bg-gray-50 dark:hover:bg-gray-800/60 px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 text-base transition-colors"
+                  onClick={() => setIsMenuOpen(false)
+      }
+                >
+                  Wallet
                 </Link>
                 <button
                   onClick={() => {
                     handleLogout();
                     setIsMenuOpen(false);
-                  }}
+        }
+      }
                   className="block hover:bg-gray-50 dark:hover:bg-gray-800/60 px-3 py-2 rounded-md w-full font-medium text-gray-700 dark:text-gray-300 text-base text-left transition-colors"
                 >
                   Sign out
@@ -306,22 +397,26 @@ const Header = () => {
                 <Link
                   to="/login"
                   className="block hover:bg-gray-50 dark:hover:bg-gray-800/60 px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 text-base transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => setIsMenuOpen(false)
+      }
                 >
                   Log in
                 </Link>
                 <Link
                   to="/register"
                   className="block bg-teal-600 hover:bg-teal-700 mt-2 px-3 py-2 rounded-md font-medium text-white text-base transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => setIsMenuOpen(false)
+      }
                 >
                   Sign up
                 </Link>
               </div>
-            )}
+            )
+    }
           </div>
         </div>
-      )}
+      )
+  }
     </header>
   );
 };

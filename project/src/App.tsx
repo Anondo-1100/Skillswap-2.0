@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { useState, useEffect
+} from 'react';
+import { BrowserRouter as Router, Routes, Route
+} from 'react-router-dom';
+import { ThemeProvider
+} from './contexts/ThemeContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import HomePage from './pages/HomePage';
@@ -11,9 +14,11 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ChatPage from './pages/ChatPage';
 import NotFoundPage from './pages/NotFoundPage';
+import WalletPage from './pages/WalletPage';
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading
+  ] = useState(true);
 
   useEffect(() => {
     // Check and apply the saved theme on initial load
@@ -21,13 +26,14 @@ function App() {
     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
     }
-    
     // Simulate initial loading
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    },
+    1000);
     return () => clearTimeout(timer);
-  }, []);
+  },
+  []);
 
   if (isLoading) {
     return (
@@ -50,14 +56,24 @@ function App() {
           <Header />
           <main className="flex-grow">
             <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/skills" element={<SkillsPage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/profile/:id" element={<ProfilePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/chat" element={<ChatPage />} />
-              <Route path="*" element={<NotFoundPage />} />
+              <Route path="/" element={<HomePage />
+  } />
+              <Route path="/skills" element={<SkillsPage />
+  } />
+              <Route path="/search" element={<SearchPage />
+  } />
+              <Route path="/profile/:id" element={<ProfilePage />
+  } />
+              <Route path="/login" element={<LoginPage />
+  } />
+              <Route path="/register" element={<RegisterPage />
+  } />
+              <Route path="/chat" element={<ChatPage />
+  } />
+              <Route path="/wallet" element={<WalletPage />
+  } />
+              <Route path="*" element={<NotFoundPage />
+  } />
             </Routes>
           </main>
           <Footer />
