@@ -34,7 +34,6 @@ const AdminDashboardPage = () => {
       navigate('/admin/login');
       return;
     }
-
     loadData();
   },
   [navigate
@@ -67,11 +66,12 @@ const AdminDashboardPage = () => {
     try {
       if (action === 'delete') {
         await adminService.deleteUser(userId);
-        // Remove user from local state
         setUsers(users.filter(u => u.id !== userId));
+        // Reload stats after deletion
+        const statsData = await adminService.getAdminStats();
+        setStats(statsData);
       } else {
         await adminService.updateUserStatus(userId, action === 'activate' ? 'active' : 'suspended');
-        // Update user status in local state
         setUsers(users.map(user => 
           user.id === userId 
             ? { ...user, status: action === 'activate' ? 'active' : 'suspended'
@@ -88,17 +88,21 @@ const AdminDashboardPage = () => {
     try {
       if (action === 'delete') {
         await adminService.deleteSkill(skillId);
-        // Remove the skill from local state
         setSkills(skills.filter(s => s.id !== skillId));
+        // Reload stats after deletion
+        const statsData = await adminService.getAdminStats();
+        setStats(statsData);
       } else {
         await adminService.updateSkillStatus(skillId, action === 'approve' ? 'active' : 'rejected');
-        // Update the skill status in local state
         setSkills(skills.map(skill => 
           skill.id === skillId 
-            ? { ...skill, status: action === 'approve' ? 'active' : 'rejected'
+            ? { ...skill, status: action === 'approve' ? 'active' : 'rejected', lastModified: new Date().toISOString()
         }
             : skill
         ));
+        // Reload stats after status change
+        const statsData = await adminService.getAdminStats();
+        setStats(statsData);
       }
     } catch (error) {
       console.error('Error handling skill action:', error);
@@ -108,9 +112,11 @@ const AdminDashboardPage = () => {
   const handleReportAction = async (reportId: number, action: 'approve' | 'reject') => {
     try {
       await adminService.handleReport(reportId, action);
-      // Refresh reports list
-      const updatedReports = await adminService.getReports();
-      setReports(updatedReports);
+      // Remove the handled report from the list
+      setReports(reports.filter(r => r.id !== reportId));
+      // Reload stats after handling report
+      const statsData = await adminService.getAdminStats();
+      setStats(statsData);
     } catch (error) {
       console.error('Error handling report action:', error);
     }
@@ -158,23 +164,23 @@ const AdminDashboardPage = () => {
       { id: 'settings', name: 'Settings', icon: Settings
       }
     ].map((tab) => (
-              <button
-                key={tab.id
+                <button
+                  key={tab.id
     }
-                onClick={() => setActiveTab(tab.id as any)
+                  onClick={() => setActiveTab(tab.id as any)
     }
-                className={`${
-                  activeTab === tab.id
-                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                  className={`${
+                    activeTab === tab.id
+                      ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
       } flex items-center py-4 px-1 border-b-2 font-medium text-sm`
     }
-              >
-                <tab.icon className="mr-2 h-5 w-5" />
-                {tab.name
+                >
+                  <tab.icon className="mr-2 h-5 w-5" />
+                  {tab.name
     }
-              </button>
-            ))
+                </button>
+              ))
   }
           </nav>
         </div>

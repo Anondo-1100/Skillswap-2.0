@@ -1,7 +1,7 @@
 import { AdminStats, UserManagement, SkillModeration } from '../types/admin';
 
-// Mock data
-const MOCK_USERS: UserManagement[] = [
+// Mock data that we'll modify
+let MOCK_USERS: UserManagement[] = [
     {
         id: '1',
         name: 'Alex Johnson',
@@ -44,7 +44,7 @@ const MOCK_USERS: UserManagement[] = [
     }
 ];
 
-const MOCK_SKILLS: SkillModeration[] = [
+let MOCK_SKILLS: SkillModeration[] = [
     {
         id: 1,
         title: 'JavaScript Fundamentals',
@@ -87,7 +87,7 @@ const MOCK_SKILLS: SkillModeration[] = [
     }
 ];
 
-const MOCK_STATS: AdminStats = {
+let MOCK_STATS: AdminStats = {
     totalUsers: 150,
     activeUsers: 89,
     totalSkills: 245,
@@ -102,6 +102,13 @@ const MOCK_STATS: AdminStats = {
     }
 };
 
+let MOCK_SETTINGS = {
+    maintenanceMode: false,
+    allowNewRegistrations: true,
+    skillApprovalRequired: true,
+    maxSkillsPerUser: 10
+};
+
 export const adminService = {
     // User Management
     getUsers: async (): Promise<UserManagement[]> => {
@@ -109,13 +116,17 @@ export const adminService = {
     },
 
     updateUserStatus: async (userId: string, status: UserManagement['status']): Promise<void> => {
-        // In a real app, this would make an API call
-        console.log(`Updated user ${userId} status to ${status}`);
+        MOCK_USERS = MOCK_USERS.map(user =>
+            user.id === userId ? { ...user, status } : user
+        );
     },
 
     deleteUser: async (userId: string): Promise<void> => {
-        // In a real app, this would make an API call
-        console.log(`Deleted user ${userId}`);
+        MOCK_USERS = MOCK_USERS.filter(user => user.id !== userId);
+        MOCK_STATS.totalUsers--;
+        if (MOCK_USERS.find(u => u.status === 'active')) {
+            MOCK_STATS.activeUsers--;
+        }
     },
 
     // Skill Management
@@ -124,13 +135,22 @@ export const adminService = {
     },
 
     updateSkillStatus: async (skillId: number, status: SkillModeration['status']): Promise<void> => {
-        // In a real app, this would make an API call
-        console.log(`Updated skill ${skillId} status to ${status}`);
+        MOCK_SKILLS = MOCK_SKILLS.map(skill =>
+            skill.id === skillId ? { ...skill, status, lastModified: new Date().toISOString() } : skill
+        );
+
+        // Update stats
+        if (status === 'pending') MOCK_STATS.pendingSkills++;
+        if (status === 'active') MOCK_STATS.pendingSkills--;
     },
 
     deleteSkill: async (skillId: number): Promise<void> => {
-        // In a real app, this would make an API call
-        console.log(`Deleted skill ${skillId}`);
+        const skill = MOCK_SKILLS.find(s => s.id === skillId);
+        MOCK_SKILLS = MOCK_SKILLS.filter(skill => skill.id !== skillId);
+        MOCK_STATS.totalSkills--;
+        if (skill?.status === 'pending') {
+            MOCK_STATS.pendingSkills--;
+        }
     },
 
     // Analytics and Stats
@@ -169,22 +189,15 @@ export const adminService = {
     },
 
     handleReport: async (reportId: number, action: 'approve' | 'reject'): Promise<void> => {
-        // In a real app, this would make an API call
-        console.log(`Handled report ${reportId} with action ${action}`);
+        MOCK_STATS.activeReports--;
     },
 
     // System Settings
     getSystemSettings: async () => {
-        return {
-            maintenanceMode: false,
-            allowNewRegistrations: true,
-            skillApprovalRequired: true,
-            maxSkillsPerUser: 10
-        };
+        return MOCK_SETTINGS;
     },
 
     updateSystemSettings: async (settings: any): Promise<void> => {
-        // In a real app, this would make an API call
-        console.log('Updated system settings:', settings);
+        MOCK_SETTINGS = { ...settings };
     }
 };
