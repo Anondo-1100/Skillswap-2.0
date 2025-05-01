@@ -35,6 +35,11 @@ const SkillsPage = () => {
   }, []);
 
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     // Filter skills based on search term, category, level, and teaching mode
     const filtered = SKILLS_DATA.filter((skill) => {
       const matchesSearch = skill.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -47,8 +52,8 @@ const SkillsPage = () => {
         skill.level.toLowerCase() === selectedLevel.toLowerCase();
 
       const matchesTeachingMode = selectedTeachingMode === 'All Modes' ||
-        (selectedTeachingMode === 'Skill Swap' && skill.teachingMode === 'swap') ||
-        (selectedTeachingMode === 'Paid' && skill.teachingMode === 'paid');
+        (selectedTeachingMode.toLowerCase() === 'skill swap' && skill.teachingMode === 'swap') ||
+        (selectedTeachingMode.toLowerCase() === 'paid' && skill.teachingMode === 'paid');
 
       return matchesSearch && matchesCategory && matchesLevel && matchesTeachingMode;
     });

@@ -172,22 +172,27 @@ const SearchPage = () => {
   }, []);
 
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     // Filter skills based on search term and filters
     const filtered = ALL_SKILLS_DATA.filter((skill) => {
       const matchesSearch = skill.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           skill.description.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesCategory = filters.category === 'All Categories' || 
-                             skill.category.toLowerCase() === filters.category.toLowerCase();
-      
-      const matchesLevel = filters.level === 'All Levels' || 
-                          skill.level.toLowerCase() === filters.level.toLowerCase();
-      
+        skill.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCategory = filters.category === 'All Categories' ||
+        skill.category.toLowerCase() === filters.category.toLowerCase();
+
+      const matchesLevel = filters.level === 'All Levels' ||
+        skill.level.toLowerCase() === filters.level.toLowerCase();
+
       const matchesRating = skill.rating >= filters.minRating;
-      
+
       return matchesSearch && matchesCategory && matchesLevel && matchesRating;
     });
-    
+
     setFilteredSkills(filtered);
   }, [searchTerm, filters]);
 
@@ -207,110 +212,110 @@ const SearchPage = () => {
     });
   };
 
-  const hasActiveFilters = filters.category !== 'All Categories' || 
-                          filters.level !== 'All Levels' || 
-                          filters.minRating > 0 ||
-                          searchTerm !== '';
+  const hasActiveFilters = filters.category !== 'All Categories' ||
+    filters.level !== 'All Levels' ||
+    filters.minRating > 0 ||
+    searchTerm !== '';
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* Search Header */}
       <div className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Search Skills</h1>
-            
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl">
+          <div className="flex md:flex-row flex-col md:justify-between md:items-center gap-4">
+            <h1 className="font-bold text-gray-900 dark:text-white text-2xl">Search Skills</h1>
+
             <div className="relative flex-1 max-w-lg">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+              <div className="left-0 absolute inset-y-0 flex items-center pl-3 pointer-events-none">
+                <Search className="w-5 h-5 text-gray-400" />
               </div>
               <input
                 type="text"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+                className="block bg-white dark:bg-gray-700 py-2 pr-3 pl-10 border border-gray-300 dark:border-gray-600 focus:border-teal-500 rounded-md focus:outline-none focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm leading-5 placeholder-gray-500"
                 placeholder="Search for any skill..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               {searchTerm && (
                 <button
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="right-0 absolute inset-y-0 flex items-center pr-3"
                   onClick={() => setSearchTerm('')}
                 >
                   <X size={16} className="text-gray-400 hover:text-gray-500" />
                 </button>
               )}
             </div>
-            
+
             <button
-              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+              className="inline-flex items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-sm px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md font-medium text-gray-700 dark:text-gray-300 text-sm"
               onClick={() => setIsFilterDrawerOpen(true)}
             >
               <SlidersHorizontal size={16} className="mr-2" />
               Filters
               {hasActiveFilters && (
-                <span className="ml-1 flex items-center justify-center w-5 h-5 text-xs bg-teal-500 text-white rounded-full">
+                <span className="flex justify-center items-center bg-teal-500 ml-1 rounded-full w-5 h-5 text-white text-xs">
                   {Object.values(filters).filter(val => val !== 'All Categories' && val !== 'All Levels' && val !== 0).length + (searchTerm ? 1 : 0)}
                 </span>
               )}
             </button>
           </div>
-          
+
           {/* Active filters */}
           {hasActiveFilters && (
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="text-sm text-gray-500 dark:text-gray-400">Active filters:</span>
-              
+            <div className="flex flex-wrap items-center gap-2 mt-4">
+              <span className="text-gray-500 dark:text-gray-400 text-sm">Active filters:</span>
+
               {searchTerm && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                <span className="inline-flex items-center bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full font-medium text-gray-800 dark:text-gray-200 text-sm">
                   Search: {searchTerm}
-                  <button 
+                  <button
                     onClick={() => setSearchTerm('')}
-                    className="ml-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    className="ml-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 dark:text-gray-400"
                   >
                     <X size={14} />
                   </button>
                 </span>
               )}
-              
+
               {filters.category !== 'All Categories' && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200">
+                <span className="inline-flex items-center bg-teal-100 dark:bg-teal-900 px-3 py-1 rounded-full font-medium text-teal-800 dark:text-teal-200 text-sm">
                   {filters.category}
-                  <button 
+                  <button
                     onClick={() => handleFilterChange('category', 'All Categories')}
-                    className="ml-1 text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-200"
+                    className="ml-1 text-teal-600 hover:text-teal-800 dark:hover:text-teal-200 dark:text-teal-400"
                   >
                     <X size={14} />
                   </button>
                 </span>
               )}
-              
+
               {filters.level !== 'All Levels' && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">
+                <span className="inline-flex items-center bg-indigo-100 dark:bg-indigo-900 px-3 py-1 rounded-full font-medium text-indigo-800 dark:text-indigo-200 text-sm">
                   {filters.level}
-                  <button 
+                  <button
                     onClick={() => handleFilterChange('level', 'All Levels')}
-                    className="ml-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200"
+                    className="ml-1 text-indigo-600 hover:text-indigo-800 dark:hover:text-indigo-200 dark:text-indigo-400"
                   >
                     <X size={14} />
                   </button>
                 </span>
               )}
-              
+
               {filters.minRating > 0 && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200">
+                <span className="inline-flex items-center bg-amber-100 dark:bg-amber-900 px-3 py-1 rounded-full font-medium text-amber-800 dark:text-amber-200 text-sm">
                   Min Rating: {filters.minRating}
-                  <button 
+                  <button
                     onClick={() => handleFilterChange('minRating', 0)}
-                    className="ml-1 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200"
+                    className="ml-1 text-amber-600 hover:text-amber-800 dark:hover:text-amber-200 dark:text-amber-400"
                   >
                     <X size={14} />
                   </button>
                 </span>
               )}
-              
+
               <button
                 onClick={resetFilters}
-                className="text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium"
+                className="font-medium text-teal-600 hover:text-teal-700 dark:hover:text-teal-300 dark:text-teal-400 text-sm"
               >
                 Clear all
               </button>
@@ -318,30 +323,30 @@ const SearchPage = () => {
           )}
         </div>
       </div>
-      
+
       {/* Filter Drawer */}
       {isFilterDrawerOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
+        <div className="z-50 fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setIsFilterDrawerOpen(false)}></div>
-          
-          <div className="fixed inset-y-0 right-0 max-w-full flex">
+
+          <div className="right-0 fixed inset-y-0 flex max-w-full">
             <div className="relative w-screen max-w-md">
-              <div className="h-full flex flex-col bg-white dark:bg-gray-800 shadow-xl overflow-y-auto">
-                <div className="flex items-center justify-between px-4 py-6 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-lg font-medium text-gray-900 dark:text-white">Filters</h2>
+              <div className="flex flex-col bg-white dark:bg-gray-800 shadow-xl h-full overflow-y-auto">
+                <div className="flex justify-between items-center px-4 py-6 border-gray-200 dark:border-gray-700 border-b">
+                  <h2 className="font-medium text-gray-900 dark:text-white text-lg">Filters</h2>
                   <button
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                    className="focus:outline-none text-gray-400 hover:text-gray-500"
                     onClick={() => setIsFilterDrawerOpen(false)}
                   >
                     <X size={24} />
                   </button>
                 </div>
-                
-                <div className="flex-1 px-4 py-6 space-y-6">
+
+                <div className="flex-1 space-y-6 px-4 py-6">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Category</h3>
+                    <h3 className="mb-2 font-medium text-gray-900 dark:text-white text-sm">Category</h3>
                     <select
-                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+                      className="block bg-white dark:bg-gray-800 shadow-sm mt-1 py-2 pr-10 pl-3 border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:outline-none focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm text-base"
                       value={filters.category}
                       onChange={(e) => handleFilterChange('category', e.target.value)}
                     >
@@ -352,18 +357,17 @@ const SearchPage = () => {
                       ))}
                     </select>
                   </div>
-                  
+
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Level</h3>
-                    <div className="grid grid-cols-3 gap-3">
+                    <h3 className="mb-2 font-medium text-gray-900 dark:text-white text-sm">Level</h3>
+                    <div className="gap-3 grid grid-cols-3">
                       {levels.map((level) => (
                         <button
                           key={level}
-                          className={`px-4 py-2 text-sm font-medium rounded-md ${
-                            filters.level === level
+                          className={`px-4 py-2 text-sm font-medium rounded-md ${filters.level === level
                               ? 'bg-teal-600 text-white'
                               : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                          }`}
+                            }`}
                           onClick={() => handleFilterChange('level', level)}
                         >
                           {level}
@@ -371,9 +375,9 @@ const SearchPage = () => {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Minimum Rating</h3>
+                    <h3 className="mb-2 font-medium text-gray-900 dark:text-white text-sm">Minimum Rating</h3>
                     <div className="flex items-center">
                       <input
                         type="range"
@@ -382,24 +386,24 @@ const SearchPage = () => {
                         step="0.5"
                         value={filters.minRating}
                         onChange={(e) => handleFilterChange('minRating', parseFloat(e.target.value))}
-                        className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                        className="bg-gray-200 dark:bg-gray-700 rounded-lg w-full h-2 appearance-none cursor-pointer"
                       />
-                      <span className="ml-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <span className="ml-4 font-medium text-gray-700 dark:text-gray-300 text-sm">
                         {filters.minRating}
                       </span>
                     </div>
                   </div>
                 </div>
-                
-                <div className="px-4 py-6 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+
+                <div className="flex justify-between px-4 py-6 border-gray-200 dark:border-gray-700 border-t">
                   <button
-                    className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 text-sm font-medium"
+                    className="font-medium text-teal-600 hover:text-teal-700 dark:hover:text-teal-300 dark:text-teal-400 text-sm"
                     onClick={resetFilters}
                   >
                     Reset filters
                   </button>
                   <button
-                    className="inline-flex justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+                    className="inline-flex justify-center bg-teal-600 hover:bg-teal-700 shadow-sm px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 font-medium text-white text-sm"
                     onClick={() => setIsFilterDrawerOpen(false)}
                   >
                     Apply filters
@@ -410,17 +414,17 @@ const SearchPage = () => {
           </div>
         </div>
       )}
-      
+
       {/* Results */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="font-semibold text-gray-900 dark:text-white text-xl">
             {filteredSkills.length} {filteredSkills.length === 1 ? 'Result' : 'Results'}
           </h2>
-          
+
           <div className="flex items-center">
-            <span className="text-sm text-gray-500 dark:text-gray-400 mr-2">Sort by:</span>
-            <select className="text-sm border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-teal-500 focus:border-teal-500">
+            <span className="mr-2 text-gray-500 dark:text-gray-400 text-sm">Sort by:</span>
+            <select className="bg-white dark:bg-gray-700 shadow-sm border-gray-300 dark:border-gray-600 focus:border-teal-500 rounded-md focus:ring-teal-500 text-gray-900 dark:text-white text-sm">
               <option>Relevance</option>
               <option>Rating: High to Low</option>
               <option>Rating: Low to High</option>
@@ -428,61 +432,61 @@ const SearchPage = () => {
             </select>
           </div>
         </div>
-        
+
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+          <div className="gap-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 animate-pulse">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 h-64"></div>
+              <div key={i} className="bg-white dark:bg-gray-800 shadow-sm p-6 rounded-lg h-64"></div>
             ))}
           </div>
         ) : filteredSkills.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="gap-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filteredSkills.map((skill) => (
               <SkillCard key={skill.id} skill={skill} />
             ))}
           </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
+          <div className="bg-white dark:bg-gray-800 shadow-sm p-8 rounded-lg text-center">
+            <div className="inline-flex justify-center items-center bg-gray-100 dark:bg-gray-700 mb-4 rounded-full w-16 h-16">
               <Search size={24} className="text-gray-500 dark:text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No results found</h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">
+            <h3 className="mb-2 font-medium text-gray-900 dark:text-white text-lg">No results found</h3>
+            <p className="mb-6 text-gray-500 dark:text-gray-400">
               We couldn't find any skills matching your search criteria. Try adjusting your filters or search query.
             </p>
             <button
               onClick={resetFilters}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+              className="inline-flex items-center bg-teal-600 hover:bg-teal-700 shadow-sm px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 font-medium text-white text-sm"
             >
               Clear all filters
             </button>
           </div>
         )}
-        
+
         {/* Pagination */}
         {filteredSkills.length > 0 && (
-          <div className="mt-8 flex justify-center">
-            <nav className="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <a href="#" className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600">
+          <div className="flex justify-center mt-8">
+            <nav className="inline-flex -space-x-px shadow-sm rounded-md" aria-label="Pagination">
+              <a href="#" className="inline-flex relative items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md font-medium text-gray-500 dark:text-gray-400 text-sm">
                 <span className="sr-only">Previous</span>
                 &laquo;
               </a>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-teal-600 text-sm font-medium text-white">
+              <a href="#" className="inline-flex relative items-center bg-teal-600 px-4 py-2 border border-gray-300 dark:border-gray-600 font-medium text-white text-sm">
                 1
               </a>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
+              <a href="#" className="inline-flex relative items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 border border-gray-300 dark:border-gray-600 font-medium text-gray-700 dark:text-gray-300 text-sm">
                 2
               </a>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
+              <a href="#" className="inline-flex relative items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 border border-gray-300 dark:border-gray-600 font-medium text-gray-700 dark:text-gray-300 text-sm">
                 3
               </a>
-              <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span className="inline-flex relative items-center bg-white dark:bg-gray-700 px-4 py-2 border border-gray-300 dark:border-gray-600 font-medium text-gray-700 dark:text-gray-300 text-sm">
                 ...
               </span>
-              <a href="#" className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
+              <a href="#" className="inline-flex relative items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 border border-gray-300 dark:border-gray-600 font-medium text-gray-700 dark:text-gray-300 text-sm">
                 8
               </a>
-              <a href="#" className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600">
+              <a href="#" className="inline-flex relative items-center bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-r-md font-medium text-gray-500 dark:text-gray-400 text-sm">
                 <span className="sr-only">Next</span>
                 &raquo;
               </a>

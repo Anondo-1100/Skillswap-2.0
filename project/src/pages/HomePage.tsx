@@ -10,6 +10,8 @@ const HomePage = () => {
 
   useEffect(() => {
     setIsVisible(true);
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
   }, []);
 
   const categories = [
@@ -22,30 +24,30 @@ const HomePage = () => {
   ];
 
   const featuredSkills = [
-    { 
-      id: 1, 
-      title: 'Python Programming', 
-      author: 'Michael Chen', 
-      rating: 4.9, 
-      reviews: 128, 
+    {
+      id: 1,
+      title: 'Python Programming',
+      author: 'Michael Chen',
+      rating: 4.9,
+      reviews: 128,
       image: 'https://images.pexels.com/photos/2004161/pexels-photo-2004161.jpeg',
       authorImage: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg',
     },
-    { 
-      id: 2, 
-      title: 'Graphic Design Basics', 
-      author: 'Sarah Johnson', 
-      rating: 4.8, 
-      reviews: 94, 
+    {
+      id: 2,
+      title: 'Graphic Design Basics',
+      author: 'Sarah Johnson',
+      rating: 4.8,
+      reviews: 94,
       image: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg',
       authorImage: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
     },
-    { 
-      id: 3, 
-      title: 'Japanese Language', 
-      author: 'Takeshi Yamada', 
-      rating: 4.7, 
-      reviews: 76, 
+    {
+      id: 3,
+      title: 'Japanese Language',
+      author: 'Takeshi Yamada',
+      rating: 4.7,
+      reviews: 76,
       image: 'https://images.pexels.com/photos/267669/pexels-photo-267669.jpeg',
       authorImage: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
     },
@@ -78,68 +80,68 @@ const HomePage = () => {
   return (
     <div className={`transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-teal-500 to-indigo-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+      <section className="relative bg-gradient-to-br from-teal-500 to-indigo-600 overflow-hidden text-white">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 max-w-7xl">
           <div className="md:max-w-2xl lg:max-w-3xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 animate-fadeIn">
+            <h1 className="mb-6 font-bold text-4xl md:text-5xl lg:text-6xl leading-tight animate-fadeIn">
               Share Your Skills. <br />
               Learn New Ones.
             </h1>
-            <p className="text-lg md:text-xl opacity-90 mb-8 max-w-lg animate-fadeIn animation-delay-200">
+            <p className="opacity-90 mb-8 max-w-lg text-lg md:text-xl animate-fadeIn animation-delay-200">
               SkillSwap connects people who want to exchange knowledge and learn from each other. Teach what you know, learn what you don't.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 animate-fadeIn animation-delay-400">
-              <Link to="/register" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-teal-700 bg-white hover:bg-gray-50 transition-colors">
+            <div className="flex sm:flex-row flex-col gap-4 animate-fadeIn animation-delay-400">
+              <Link to="/register" className="inline-flex justify-center items-center bg-white hover:bg-gray-50 shadow-sm px-6 py-3 border border-transparent rounded-md font-medium text-teal-700 text-base transition-colors">
                 Get Started <ArrowRight size={18} className="ml-2" />
               </Link>
-              <Link to="/skills" className="inline-flex items-center justify-center px-6 py-3 border border-white text-base font-medium rounded-md text-white hover:bg-white/10 transition-colors">
+              <Link to="/skills" className="inline-flex justify-center items-center hover:bg-white/10 px-6 py-3 border border-white rounded-md font-medium text-white text-base transition-colors">
                 Explore Skills
               </Link>
             </div>
           </div>
         </div>
-        
+
         {/* Decorative Elements */}
-        <div className="absolute -bottom-24 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-16 right-16 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl"></div>
+        <div className="right-0 -bottom-24 absolute bg-white/10 blur-3xl rounded-full w-96 h-96"></div>
+        <div className="top-16 right-16 absolute bg-indigo-500/20 blur-3xl rounded-full w-64 h-64"></div>
       </section>
 
       {/* Features Section */}
-      <section className="py-16 md:py-24 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">How SkillSwap Works</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+      <section className="bg-white dark:bg-gray-900 py-16 md:py-24">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 font-bold text-gray-900 dark:text-white text-3xl md:text-4xl">How SkillSwap Works</h2>
+            <p className="mx-auto max-w-2xl text-gray-600 dark:text-gray-400 text-lg">
               Exchange skills with others and learn something new in three simple steps.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-gray-50 dark:bg-gray-800 hover:shadow-md transition-shadow">
-              <div className="w-16 h-16 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center mb-4">
+
+          <div className="gap-8 md:gap-12 grid grid-cols-1 md:grid-cols-3">
+            <div className="flex flex-col items-center bg-gray-50 dark:bg-gray-800 hover:shadow-md p-6 rounded-lg text-center transition-shadow">
+              <div className="flex justify-center items-center bg-teal-100 dark:bg-teal-900 mb-4 rounded-full w-16 h-16">
                 <Search className="w-8 h-8 text-teal-600 dark:text-teal-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Discover Skills</h3>
+              <h3 className="mb-2 font-semibold text-gray-900 dark:text-white text-xl">Discover Skills</h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Browse through various skills offered by our community members or search for specific ones.
               </p>
             </div>
-            
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-gray-50 dark:bg-gray-800 hover:shadow-md transition-shadow">
-              <div className="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center mb-4">
+
+            <div className="flex flex-col items-center bg-gray-50 dark:bg-gray-800 hover:shadow-md p-6 rounded-lg text-center transition-shadow">
+              <div className="flex justify-center items-center bg-indigo-100 dark:bg-indigo-900 mb-4 rounded-full w-16 h-16">
                 <Users className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Connect & Swap</h3>
+              <h3 className="mb-2 font-semibold text-gray-900 dark:text-white text-xl">Connect & Swap</h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Match with others who have complementary skills and interests, then arrange to swap knowledge.
               </p>
             </div>
-            
-            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-gray-50 dark:bg-gray-800 hover:shadow-md transition-shadow">
-              <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900 flex items-center justify-center mb-4">
+
+            <div className="flex flex-col items-center bg-gray-50 dark:bg-gray-800 hover:shadow-md p-6 rounded-lg text-center transition-shadow">
+              <div className="flex justify-center items-center bg-amber-100 dark:bg-amber-900 mb-4 rounded-full w-16 h-16">
                 <Trophy className="w-8 h-8 text-amber-600 dark:text-amber-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Grow Together</h3>
+              <h3 className="mb-2 font-semibold text-gray-900 dark:text-white text-xl">Grow Together</h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Learn new skills, build your reputation, and become part of a supportive community.
               </p>
@@ -149,28 +151,28 @@ const HomePage = () => {
       </section>
 
       {/* Categories Section */}
-      <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-gray-50 dark:bg-gray-800 py-16 md:py-24">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
           <div className="flex justify-between items-end mb-10">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Popular Categories</h2>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
+              <h2 className="mb-4 font-bold text-gray-900 dark:text-white text-3xl">Popular Categories</h2>
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
                 Explore skills by category and find what interests you the most.
               </p>
             </div>
-            <Link to="/skills" className="hidden md:flex items-center text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300">
+            <Link to="/skills" className="hidden md:flex items-center text-teal-600 hover:text-teal-700 dark:hover:text-teal-300 dark:text-teal-400">
               View all categories <ArrowUpRight size={16} className="ml-1" />
             </Link>
           </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <div className="gap-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map((category) => (
               <CategoryCard key={category.id} category={category} />
             ))}
           </div>
-          
-          <div className="mt-8 text-center md:hidden">
-            <Link to="/skills" className="inline-flex items-center text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300">
+
+          <div className="md:hidden mt-8 text-center">
+            <Link to="/skills" className="inline-flex items-center text-teal-600 hover:text-teal-700 dark:hover:text-teal-300 dark:text-teal-400">
               View all categories <ArrowUpRight size={16} className="ml-1" />
             </Link>
           </div>
@@ -178,28 +180,28 @@ const HomePage = () => {
       </section>
 
       {/* Featured Skills Section */}
-      <section className="py-16 md:py-24 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-white dark:bg-gray-900 py-16 md:py-24">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
           <div className="flex justify-between items-end mb-10">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Featured Skills</h2>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
+              <h2 className="mb-4 font-bold text-gray-900 dark:text-white text-3xl">Featured Skills</h2>
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
                 Check out these highly-rated skills from our community.
               </p>
             </div>
-            <Link to="/skills" className="hidden md:flex items-center text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300">
+            <Link to="/skills" className="hidden md:flex items-center text-teal-600 hover:text-teal-700 dark:hover:text-teal-300 dark:text-teal-400">
               View all skills <ArrowUpRight size={16} className="ml-1" />
             </Link>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+          <div className="gap-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {featuredSkills.map((skill) => (
               <FeaturedSkillCard key={skill.id} skill={skill} />
             ))}
           </div>
-          
-          <div className="mt-8 text-center md:hidden">
-            <Link to="/skills" className="inline-flex items-center text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300">
+
+          <div className="md:hidden mt-8 text-center">
+            <Link to="/skills" className="inline-flex items-center text-teal-600 hover:text-teal-700 dark:hover:text-teal-300 dark:text-teal-400">
               View all skills <ArrowUpRight size={16} className="ml-1" />
             </Link>
           </div>
@@ -207,16 +209,16 @@ const HomePage = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">What Our Community Says</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+      <section className="bg-gray-50 dark:bg-gray-800 py-16 md:py-24">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 font-bold text-gray-900 dark:text-white text-3xl md:text-4xl">What Our Community Says</h2>
+            <p className="mx-auto max-w-2xl text-gray-600 dark:text-gray-400 text-lg">
               Hear from people who have successfully exchanged skills and grown their knowledge.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+          <div className="gap-8 grid grid-cols-1 md:grid-cols-3">
             {testimonials.map((testimonial) => (
               <TestimonialCard key={testimonial.id} testimonial={testimonial} />
             ))}
@@ -225,17 +227,17 @@ const HomePage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Start Swapping Skills?</h2>
-          <p className="text-lg md:text-xl opacity-90 mb-8 max-w-2xl mx-auto">
+      <section className="bg-gradient-to-br from-indigo-600 to-purple-700 py-16 md:py-24 text-white">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl text-center">
+          <h2 className="mb-6 font-bold text-3xl md:text-4xl">Ready to Start Swapping Skills?</h2>
+          <p className="opacity-90 mx-auto mb-8 max-w-2xl text-lg md:text-xl">
             Join our community today and begin your journey of teaching and learning.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/register" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-indigo-700 bg-white hover:bg-gray-50 transition-colors">
+          <div className="flex sm:flex-row flex-col justify-center gap-4">
+            <Link to="/register" className="inline-flex justify-center items-center bg-white hover:bg-gray-50 shadow-sm px-6 py-3 border border-transparent rounded-md font-medium text-indigo-700 text-base transition-colors">
               Sign Up Now <ArrowRight size={18} className="ml-2" />
             </Link>
-            <Link to="/skills" className="inline-flex items-center justify-center px-6 py-3 border border-white text-base font-medium rounded-md text-white hover:bg-white/10 transition-colors">
+            <Link to="/skills" className="inline-flex justify-center items-center hover:bg-white/10 px-6 py-3 border border-white rounded-md font-medium text-white text-base transition-colors">
               Browse Skills
             </Link>
           </div>
