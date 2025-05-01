@@ -1,0 +1,29 @@
+// The search works through these main components:
+
+1. State Management:
+- searchTerm state to track user input
+- filteredSkills state to store filtered results
+
+2. Search Logic:
+The filtering happens through useEffect that watches for searchTerm changes:
+- Matches both title and description
+- Case-insensitive search
+- Combined with other filters (category, level, etc.)
+
+Here's the key search implementation from SearchPage.tsx:
+
+const filtered = ALL_SKILLS_DATA.filter((skill) => {
+  // Search matches title or description
+  const matchesSearch = skill.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    skill.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+  // Additional filter conditions
+  const matchesCategory = filters.category === 'All Categories' ||
+    skill.category.toLowerCase() === filters.category.toLowerCase();
+  
+  const matchesLevel = filters.level === 'All Levels' ||
+    skill.level.toLowerCase() === filters.level.toLowerCase();
+
+  // Combined conditions
+  return matchesSearch && matchesCategory && matchesLevel;
+});

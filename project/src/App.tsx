@@ -15,6 +15,8 @@ import RegisterPage from './pages/RegisterPage';
 import ChatPage from './pages/ChatPage';
 import NotFoundPage from './pages/NotFoundPage';
 import WalletPage from './pages/WalletPage';
+import AdminLoginPage from './pages/AdminLoginPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 function App() {
   const [isLoading, setIsLoading
@@ -71,6 +73,10 @@ function App() {
               <Route path="/chat" element={<ChatPage />
   } />
               <Route path="/wallet" element={<WalletPage />
+  } />
+              <Route path="/admin/login" element={<AdminLoginPage />
+  } />
+              <Route path="/admin/dashboard" element={<AdminDashboardPage />
   } />
               <Route path="*" element={<NotFoundPage />
   } />

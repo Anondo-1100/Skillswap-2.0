@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate
 } from 'react-router-dom';
 import { ThemeContext
 } from '../../contexts/ThemeContext';
-import { Menu, X, SunMoon, MessageSquare, Bell, User, LogOut, Wallet
+import { Menu, X, SunMoon, MessageSquare, Bell, User, LogOut, Wallet, Shield
 } from 'lucide-react';
 
 const Header = () => {
@@ -37,6 +37,8 @@ const Header = () => {
   ] = useState(false);
   const [userAvatar, setUserAvatar
   ] = useState('');
+  const [isAdmin, setIsAdmin
+  ] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const notificationsRef = useRef(null);
@@ -46,7 +48,9 @@ const Header = () => {
 
   useEffect(() => {
     const loginStatus = localStorage.getItem('isLoggedIn') === 'true';
+    const adminStatus = localStorage.getItem('isAdminLoggedIn') === 'true';
     setIsLoggedIn(loginStatus);
+    setIsAdmin(adminStatus);
 
     if (loginStatus) {
       const userData = localStorage.getItem('userData');
@@ -91,7 +95,9 @@ const Header = () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userId');
     localStorage.removeItem('userData');
+    localStorage.removeItem('isAdminLoggedIn');
     setIsLoggedIn(false);
+    setIsAdmin(false);
     setUserAvatar('');
     navigate('/');
   };
@@ -263,6 +269,20 @@ const Header = () => {
                       className="right-0 absolute bg-white dark:bg-gray-800 ring-opacity-5 shadow-lg mt-2 rounded-md ring-1 ring-black w-48"
                     >
                       <div className="py-1">
+                        {isAdmin && (
+                          <Link
+                            to="/admin/dashboard"
+                            className="block hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 text-gray-700 dark:text-gray-300 text-sm"
+                            onClick={() => setIsProfileMenuOpen(false)
+        }
+                          >
+                            <Shield size={
+          16
+        } className="inline mr-2" />
+                            Admin Dashboard
+                          </Link>
+                        )
+      }
                         <Link
                           to="/profile/1"
                           className="block hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 text-gray-700 dark:text-gray-300 text-sm"
@@ -373,6 +393,17 @@ const Header = () => {
                 >
                   Profile
                 </Link>
+                {isAdmin && (
+                  <Link
+                    to="/admin/dashboard"
+                    className="block hover:bg-gray-50 dark:hover:bg-gray-800/60 px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 text-base transition-colors"
+                    onClick={() => setIsMenuOpen(false)
+        }
+                  >
+                    Admin Dashboard
+                  </Link>
+                )
+      }
                 <Link
                   to="/wallet"
                   className="block hover:bg-gray-50 dark:hover:bg-gray-800/60 px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 text-base transition-colors"
