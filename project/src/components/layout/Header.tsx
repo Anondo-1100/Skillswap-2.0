@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate
 } from 'react-router-dom';
 import { ThemeContext
 } from '../../contexts/ThemeContext';
-import { Menu, X, SunMoon, MessageSquare, Bell, User, LogOut, Wallet, Shield
+import { Menu, X, SunMoon, MessageSquare, Bell, User, LogOut, Shield
 } from 'lucide-react';
 
 const Header = () => {
@@ -294,17 +294,6 @@ const Header = () => {
       } className="inline mr-2" />
                           Profile
                         </Link>
-                        <Link
-                          to="/wallet"
-                          className="block hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 text-gray-700 dark:text-gray-300 text-sm"
-                          onClick={() => setIsProfileMenuOpen(false)
-      }
-                        >
-                          <Wallet size={
-        16
-      } className="inline mr-2" />
-                          Wallet
-                        </Link>
                         <button
                           onClick={() => {
                             handleLogout();
@@ -404,14 +393,6 @@ const Header = () => {
                   </Link>
                 )
       }
-                <Link
-                  to="/wallet"
-                  className="block hover:bg-gray-50 dark:hover:bg-gray-800/60 px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 text-base transition-colors"
-                  onClick={() => setIsMenuOpen(false)
-      }
-                >
-                  Wallet
-                </Link>
                 <button
                   onClick={() => {
                     handleLogout();

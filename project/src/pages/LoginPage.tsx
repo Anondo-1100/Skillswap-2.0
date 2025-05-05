@@ -18,18 +18,7 @@ const MOCK_USER = {
   verified: true,
   bio: 'Full-stack developer with 5+ years of experience. Passionate about teaching coding and learning photography.',
   teachingSkills: [],
-  learningSkills: [],
-  walletBalance: 100.00,
-  transactions: [
-    {
-      id: 'txn1',
-      type: 'deposit',
-      amount: 100.00,
-      description: 'Initial deposit',
-      timestamp: new Date().toISOString(),
-      status: 'completed'
-    }
-  ]
+  learningSkills: []
 };
 
 const LoginPage = () => {

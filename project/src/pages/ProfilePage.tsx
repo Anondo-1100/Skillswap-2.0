@@ -20,15 +20,6 @@ interface Skill {
   price?: number;
 }
 
-interface Transaction {
-  id: string;
-  type: 'deposit' | 'withdrawal' | 'payment';
-  amount: number;
-  description: string;
-  timestamp: string;
-  status: 'pending' | 'completed' | 'failed';
-}
-
 interface UserData {
   id: string;
   name: string;
@@ -40,8 +31,6 @@ interface UserData {
   joinedDate: string;
   verified: boolean;
   bio: string;
-  walletBalance: number;
-  transactions: Transaction[];
   teachingSkills: Skill[];
   learningSkills: Skill[];
 }
@@ -57,25 +46,6 @@ const USER_DATA: UserData = {
   joinedDate: 'January 2023',
   verified: true,
   bio: 'Full-stack developer with 5+ years of experience. Passionate about teaching coding and learning photography.',
-  walletBalance: 100.0,
-  transactions: [
-    {
-      id: 'txn1',
-      type: 'deposit',
-      amount: 50.0,
-      description: 'Initial deposit',
-      timestamp: '2023-01-01T10: 00: 00Z',
-      status: 'completed'
-    },
-    {
-      id: 'txn2',
-      type: 'payment',
-      amount: 20.0,
-      description: 'React course payment',
-      timestamp: '2023-01-15T14: 30: 00Z',
-      status: 'completed'
-    }
-  ],
   teachingSkills: [
     {
       id: 1,
@@ -163,7 +133,7 @@ const ProfilePage = () => {
     };
 
     fetchUser();
-    
+
     // Scroll to top when component mounts with smooth behavior
     window.scrollTo({ top: 0, behavior: 'smooth'
     });

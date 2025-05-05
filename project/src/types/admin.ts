@@ -34,8 +34,6 @@ export interface AdminStats {
     activeUsers: number;
     totalSkills: number;
     pendingSkills: number;
-    totalTransactions: number;
-    revenueThisMonth: number;
     activeReports: number;
     systemHealth: {
         status: 'healthy' | 'warning' | 'critical';

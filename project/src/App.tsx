@@ -14,7 +14,6 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ChatPage from './pages/ChatPage';
 import NotFoundPage from './pages/NotFoundPage';
-import WalletPage from './pages/WalletPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 
@@ -71,8 +70,6 @@ function App() {
               <Route path="/register" element={<RegisterPage />
   } />
               <Route path="/chat" element={<ChatPage />
-  } />
-              <Route path="/wallet" element={<WalletPage />
   } />
               <Route path="/admin/login" element={<AdminLoginPage />
   } />
