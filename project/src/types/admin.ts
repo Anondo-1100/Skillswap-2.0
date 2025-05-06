@@ -7,6 +7,24 @@ export interface AdminUser {
     createdAt: string;
 }
 
+export interface MessageReply {
+    id: number;
+    messageId: number;
+    adminName: string;
+    content: string;
+    createdAt: string;
+}
+
+export interface UserMessage {
+    id: number;
+    name: string;
+    email: string;
+    message: string;
+    createdAt: string;
+    status: 'new' | 'read' | 'archived';
+    reply?: MessageReply;
+}
+
 export interface UserManagement {
     id: string;
     name: string;
@@ -35,6 +53,7 @@ export interface AdminStats {
     totalSkills: number;
     pendingSkills: number;
     activeReports: number;
+    newMessages: number;
     systemHealth: {
         status: 'healthy' | 'warning' | 'critical';
         lastChecked: string;

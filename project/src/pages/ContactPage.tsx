@@ -1,20 +1,52 @@
-import { useState } from 'react';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { useState, useEffect
+} from 'react';
+import { Mail, Phone, MapPin, MessageCircle, Clock
+} from 'lucide-react';
+import { adminService
+} from '../services/adminService';
+import type { UserMessage
+} from '../types/admin';
 
 const ContactPage = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData
+  ] = useState({
     name: '',
     email: '',
     message: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
+  const [isSubmitting, setIsSubmitting
+  ] = useState(false);
+  const [submitStatus, setSubmitStatus
+  ] = useState<'success' | 'error' | null>(null);
+  const [userMessages, setUserMessages
+  ] = useState<UserMessage[]>([]);
+  const [userEmail, setUserEmail
+  ] = useState('');
+
+  useEffect(() => {
+    // In a real app, this would come from user authentication
+    const mockUserEmail = 'user@example.com';
+    setUserEmail(mockUserEmail);
+    loadUserMessages(mockUserEmail);
+  },
+  []);
+
+  const loadUserMessages = async (email: string) => {
+    try {
+      const messages = await adminService.getUserMessages(email);
+      setUserMessages(messages);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    const { name, value
+    } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name
+      ]: value
     }));
   };
 
@@ -24,12 +56,15 @@ const ContactPage = () => {
     setSubmitStatus(null);
 
     try {
-      // Here you would normally make an API call to your backend
-      // For now, we'll simulate an API call with a timeout
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await adminService.addMessage({
+        name: formData.name,
+        email: formData.email,
+        message: formData.message
+      });
       
       // Reset form after successful submission
-      setFormData({ name: '', email: '', message: '' });
+      setFormData({ name: '', email: '', message: ''
+      });
       setSubmitStatus('success');
     } catch (error) {
       setSubmitStatus('error');
@@ -41,15 +76,17 @@ const ContactPage = () => {
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen py-12">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Get in Touch Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          { /* Get in Touch Section */}
           <div>
             <h2 className="font-bold text-gray-900 dark:text-white text-3xl mb-6">Get in Touch</h2>
             <div className="space-y-6">
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-white text-lg mb-2">Email</h3>
                 <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Mail className="mr-2" size={20} />
+                  <Mail className="mr-2" size={
+    20
+  } />
                   <a href="mailto:support@skillswap.com" className="hover:text-teal-600 dark:hover:text-teal-400">
                     support@skillswap.com
                   </a>
@@ -60,18 +97,23 @@ const ContactPage = () => {
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-white text-lg mb-2">Phone</h3>
                 <div className="flex items-center text-gray-600 dark:text-gray-400">
-                  <Phone className="mr-2" size={20} />
+                  <Phone className="mr-2" size={
+    20
+  } />
                   <a href="tel:+15551234567" className="hover:text-teal-600 dark:hover:text-teal-400">
                     +1 (555) 123-4567
                   </a>
                 </div>
-                <p className="mt-1 text-gray-500 dark:text-gray-400 text-sm">Mon-Fri, 9AM-6PM EST</p>
+                <p className="mt-1 text-gray-500 dark:text-gray-400 text-sm">Mon-Fri,
+  9AM-6PM EST</p>
               </div>
 
               <div>
                 <h3 className="font-medium text-gray-900 dark:text-white text-lg mb-2">Location</h3>
                 <div className="flex items-start text-gray-600 dark:text-gray-400">
-                  <MapPin className="mr-2 mt-1" size={20} />
+                  <MapPin className="mr-2 mt-1" size={
+    20
+  } />
                   <div>
                     <p>123 Skill Street</p>
                     <p>San Francisco, CA 94105</p>
@@ -81,10 +123,11 @@ const ContactPage = () => {
             </div>
           </div>
 
-          {/* Contact Form Section */}
+          { /* Contact Form Section */}
           <div>
             <h2 className="font-bold text-gray-900 dark:text-white text-3xl mb-6">Send Us a Message</h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit
+  } className="space-y-6">
               <div>
                 <label htmlFor="name" className="block mb-1 font-medium text-gray-700 dark:text-gray-300 text-sm">
                   Name
@@ -93,8 +136,10 @@ const ContactPage = () => {
                   type="text"
                   id="name"
                   name="name"
-                  value={formData.name}
-                  onChange={handleChange}
+                  value={formData.name
+  }
+                  onChange={handleChange
+  }
                   required
                   className="block bg-white dark:bg-gray-800 shadow-sm px-3 py-2 border border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:outline-none focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm"
                   placeholder="Your name"
@@ -109,8 +154,10 @@ const ContactPage = () => {
                   type="email"
                   id="email"
                   name="email"
-                  value={formData.email}
-                  onChange={handleChange}
+                  value={formData.email
+  }
+                  onChange={handleChange
+  }
                   required
                   className="block bg-white dark:bg-gray-800 shadow-sm px-3 py-2 border border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:outline-none focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm"
                   placeholder="you@example.com"
@@ -124,10 +171,14 @@ const ContactPage = () => {
                 <textarea
                   id="message"
                   name="message"
-                  value={formData.message}
-                  onChange={handleChange}
+                  value={formData.message
+  }
+                  onChange={handleChange
+  }
                   required
-                  rows={4}
+                  rows={
+    4
+  }
                   className="block bg-white dark:bg-gray-800 shadow-sm px-3 py-2 border border-gray-300 dark:border-gray-700 focus:border-teal-500 rounded-md focus:outline-none focus:ring-teal-500 w-full text-gray-900 dark:text-white sm:text-sm"
                   placeholder="How can we help you?"
                 />
@@ -137,17 +188,20 @@ const ContactPage = () => {
                 <div className="bg-green-50 dark:bg-green-900/30 p-3 rounded-md text-green-800 dark:text-green-200 text-sm">
                   Message sent successfully! We'll get back to you soon.
                 </div>
-              )}
+              )
+  }
 
               {submitStatus === 'error' && (
                 <div className="bg-red-50 dark:bg-red-900/30 p-3 rounded-md text-red-800 dark:text-red-200 text-sm">
                   There was an error sending your message. Please try again.
                 </div>
-              )}
+              )
+  }
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting
+  }
                 className="inline-flex justify-center items-center bg-teal-600 hover:bg-teal-700 disabled:opacity-50 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 w-full font-medium text-white text-sm disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
@@ -160,11 +214,79 @@ const ContactPage = () => {
                   </>
                 ) : (
                   'Send Message'
-                )}
+                )
+  }
               </button>
             </form>
           </div>
         </div>
+
+        { /* Message History Section */}
+        {userMessages.length > 0 && (
+          <div className="mt-12">
+            <h2 className="font-bold text-gray-900 dark:text-white text-2xl mb-6">Message History</h2>
+            <div className="space-y-6">
+              {userMessages.map((msg) => (
+                <div 
+                  key={msg.id
+      }
+                  className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center">
+                      <MessageCircle className="h-5 w-5 text-gray-400" />
+                      <span className="ml-2 text-sm font-medium text-gray-900 dark:text-white">
+                        Your Message
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <Clock className="h-4 w-4 mr-1" />
+                      {new Date(msg.createdAt).toLocaleString()
+      }
+                    </div>
+                  </div>
+                  <p className="mt-4 text-gray-700 dark:text-gray-300">
+                    {msg.message
+      }
+                  </p>
+
+                  {msg.reply && (
+                    <div className="mt-6 pl-4 border-l-2 border-teal-500">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center">
+                          <MessageCircle className="h-5 w-5 text-teal-500" />
+                          <span className="ml-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Reply from {msg.reply.adminName
+        }
+                          </span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                          <Clock className="h-4 w-4 mr-1" />
+                          {new Date(msg.reply.createdAt).toLocaleString()
+        }
+                        </div>
+                      </div>
+                      <p className="mt-4 text-gray-700 dark:text-gray-300">
+                        {msg.reply.content
+        }
+                      </p>
+                    </div>
+                  )
+      }
+
+                  {!msg.reply && msg.status !== 'archived' && (
+                    <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                      Awaiting response...
+                    </p>
+                  )
+      }
+                </div>
+              ))
+    }
+            </div>
+          </div>
+        )
+  }
       </div>
     </div>
   );

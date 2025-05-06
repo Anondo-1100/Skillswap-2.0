@@ -1,4 +1,4 @@
-import { AdminStats, UserManagement, SkillModeration } from '../types/admin';
+import { AdminStats, UserManagement, SkillModeration, UserMessage, MessageReply } from '../types/admin';
 
 // Mock data that we'll modify
 let MOCK_USERS: UserManagement[] = [
@@ -87,6 +87,9 @@ let MOCK_SKILLS: SkillModeration[] = [
     }
 ];
 
+let MOCK_MESSAGES: UserMessage[] = [];
+let MOCK_MESSAGE_REPLIES: MessageReply[] = [];
+
 let MOCK_STATS: AdminStats = {
     totalUsers: 150,
     activeUsers: 89,
@@ -95,6 +98,7 @@ let MOCK_STATS: AdminStats = {
     totalTransactions: 567,
     revenueThisMonth: 4500,
     activeReports: 8,
+    newMessages: 0,
     systemHealth: {
         status: 'healthy',
         lastChecked: new Date().toISOString(),
@@ -190,6 +194,75 @@ export const adminService = {
 
     handleReport: async (reportId: number, action: 'approve' | 'reject'): Promise<void> => {
         MOCK_STATS.activeReports--;
+    },
+
+    // Message Management
+    getMessages: async (): Promise<UserMessage[]> => {
+        return MOCK_MESSAGES.map(msg => ({
+            ...msg,
+            reply: MOCK_MESSAGE_REPLIES.find(reply => reply.messageId === msg.id)
+        }));
+    },
+
+    addMessage: async (message: Omit<UserMessage, 'id' | 'createdAt' | 'status'>): Promise<void> => {
+        const newMessage = {
+            ...message,
+            id: MOCK_MESSAGES.length + 1,
+            createdAt: new Date().toISOString(),
+            status: 'new' as const
+        };
+        MOCK_MESSAGES.unshift(newMessage);
+        MOCK_STATS.newMessages++;
+    },
+
+    replyToMessage: async (messageId: number, adminName: string, content: string): Promise<void> => {
+        const reply: MessageReply = {
+            id: MOCK_MESSAGE_REPLIES.length + 1,
+            messageId,
+            adminName,
+            content,
+            createdAt: new Date().toISOString()
+        };
+        MOCK_MESSAGE_REPLIES.push(reply);
+
+        // Update message status to read if it was new
+        MOCK_MESSAGES = MOCK_MESSAGES.map(msg => {
+            if (msg.id === messageId && msg.status === 'new') {
+                MOCK_STATS.newMessages--;
+                return { ...msg, status: 'read' };
+            }
+            return msg;
+        });
+    },
+
+    getUserMessages: async (userEmail: string): Promise<UserMessage[]> => {
+        return MOCK_MESSAGES
+            .filter(msg => msg.email === userEmail)
+            .map(msg => ({
+                ...msg,
+                reply: MOCK_MESSAGE_REPLIES.find(reply => reply.messageId === msg.id)
+            }))
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    },
+
+    updateMessageStatus: async (messageId: number, status: UserMessage['status']): Promise<void> => {
+        MOCK_MESSAGES = MOCK_MESSAGES.map(msg => {
+            if (msg.id === messageId) {
+                if (msg.status === 'new' && status !== 'new') {
+                    MOCK_STATS.newMessages--;
+                }
+                return { ...msg, status };
+            }
+            return msg;
+        });
+    },
+
+    deleteMessage: async (messageId: number): Promise<void> => {
+        const message = MOCK_MESSAGES.find(m => m.id === messageId);
+        if (message?.status === 'new') {
+            MOCK_STATS.newMessages--;
+        }
+        MOCK_MESSAGES = MOCK_MESSAGES.filter(msg => msg.id !== messageId);
     },
 
     // System Settings

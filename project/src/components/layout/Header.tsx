@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate
 } from 'react-router-dom';
 import { ThemeContext
 } from '../../contexts/ThemeContext';
-import { Menu, X, SunMoon, Bell, User, LogOut, Shield, Phone
+import { Menu, X, SunMoon, Bell, User, LogOut, Shield, Phone, Check
 } from 'lucide-react';
 
 const Header = () => {
@@ -17,22 +17,10 @@ const Header = () => {
   const [isNotificationsOpen, setIsNotificationsOpen
   ] = useState(false);
   const [notifications, setNotifications
-  ] = useState([
-    {
-      id: 1,
-      title: "New skill match",
-      message: "Found a match for your JavaScript learning interest",
-      time: "2 hours ago",
-      isRead: false
-    },
-    {
-      id: 2,
-      title: "New review",
-      message: "Someone left a review on your Python teaching",
-      time: "1 day ago",
-      isRead: false
-    }
-  ]);
+  ] = useState(() => {
+    const savedNotifications = localStorage.getItem('notifications');
+    return savedNotifications ? JSON.parse(savedNotifications) : [];
+  });
   const [isLoggedIn, setIsLoggedIn
   ] = useState(false);
   const [userAvatar, setUserAvatar
@@ -46,6 +34,31 @@ const Header = () => {
   const notificationButtonRef = useRef(null);
   const profileMenuRef = useRef(null);
   const profileButtonRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notificationsRef.current &&
+        notificationButtonRef.current &&
+        !notificationsRef.current.contains(event.target) &&
+        !notificationButtonRef.current.contains(event.target)
+      ) {
+        setIsNotificationsOpen(false);
+      }
+      if (
+        profileMenuRef.current &&
+        profileButtonRef.current &&
+        !profileMenuRef.current.contains(event.target) &&
+        !profileButtonRef.current.contains(event.target)
+      ) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  },
+  []);
 
   useEffect(() => {
     const loginStatus = localStorage.getItem('isLoggedIn') === 'true';
@@ -65,6 +78,34 @@ const Header = () => {
   [location
   ]);
 
+  useEffect(() => {
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+  },
+  [notifications
+  ]);
+
+  const markNotificationAsRead = (id) => {
+    setNotifications(
+      notifications.map((notification) =>
+        notification.id === id ? { ...notification, isRead: true
+    } : notification
+      )
+    );
+  };
+
+  const markAllNotificationsAsRead = () => {
+    setNotifications(notifications.map((notification) => ({ ...notification, isRead: true
+    })));
+  };
+
+  const deleteNotification = (id) => {
+    setNotifications(notifications.filter((notification) => notification.id !== id));
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
+  };
+
   const navigation = [
     { name: 'Home', path: '/'
     },
@@ -73,7 +114,7 @@ const Header = () => {
     { name: 'Search', path: '/search'
     },
     { name: 'Contact', path: '/contact'
-    }
+    },
   ];
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -141,15 +182,118 @@ const Header = () => {
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)
     }
                   className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors relative"
+                  aria-label="View notifications"
                 >
                   <Bell size={
       20
     } />
-                  {notifications.filter(n => !n.isRead).length > 0 && (
-                    <span className="absolute top-0 right-0 block bg-red-500 rounded-full w-2 h-2"></span>
+                  {notifications.filter((n) => !n.isRead).length > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                      {notifications.filter((n) => !n.isRead).length
+      }
+                    </span>
                   )
     }
                 </button>
+
+                {isNotificationsOpen && (
+                  <div
+                    ref={notificationsRef
+      }
+                    className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    style={
+        { top: '100%'
+        }
+      }
+                  >
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={markAllNotificationsAsRead
+      }
+                            className="text-xs font-bold text-teal-600 hover:text-teal-700 dark:hover:text-teal-400"
+                          >
+                            Mark all as read
+                          </button>
+                          <button
+                            onClick={clearAllNotifications
+      }
+                            className="text-xs font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400"
+                          >
+                            Clear all
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="py-4 px-6 text-center text-sm font-bold text-gray-500 dark:text-gray-400">
+                          No notifications
+                        </div>
+                      ) : (
+                        <div className="py-2">
+                          {notifications.map((notification) => (
+                            <div
+                              key={notification.id
+          }
+                              className={`relative px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
+                                !notification.isRead ? 'bg-teal-50 dark:bg-teal-900/20' : ''
+            }`
+          }
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {notification.title
+          }
+                                  </p>
+                                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    {notification.message
+          }
+                                  </p>
+                                  <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                    {notification.time
+          }
+                                  </p>
+                                </div>
+                                <div className="ml-4 flex-shrink-0 flex space-x-2">
+                                  {!notification.isRead && (
+                                    <button
+                                      onClick={() => markNotificationAsRead(notification.id)
+            }
+                                      className="text-teal-600 hover:text-teal-700 dark:hover:text-teal-400"
+                                      title="Mark as read"
+                                    >
+                                      <Check size={
+              16
+            } />
+                                    </button>
+                                  )
+          }
+                                  <button
+                                    onClick={() => deleteNotification(notification.id)
+          }
+                                    className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                                    title="Delete notification"
+                                  >
+                                    <X size={
+            16
+          } />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+        }
+                        </div>
+                      )
+      }
+                    </div>
+                  </div>
+                )
+    }
 
                 <div className="relative">
                   <button
@@ -160,8 +304,7 @@ const Header = () => {
                     className="flex items-center"
                   >
                     <img
-                      src={userAvatar || "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg"
-    }
+                      src={userAvatar || 'https: //images.pexels.com/photos/220453/pexels-photo-220453.jpeg'}
                       alt="Profile"
                       className="rounded-full w-8 h-8 object-cover"
                     />
@@ -170,7 +313,7 @@ const Header = () => {
                   {isProfileMenuOpen && (
                     <div
                       ref={profileMenuRef
-      }
+        }
                       className="right-0 absolute bg-white dark:bg-gray-800 ring-opacity-5 shadow-lg mt-2 rounded-md ring-1 ring-black w-48"
                     >
                       <div className="py-1">
@@ -179,43 +322,43 @@ const Header = () => {
                             to="/admin/dashboard"
                             className="block hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 text-gray-700 dark:text-gray-300 text-sm"
                             onClick={() => setIsProfileMenuOpen(false)
-        }
+          }
                           >
                             <Shield size={
-          16
-        } className="inline mr-2" />
+            16
+          } className="inline mr-2" />
                             Admin Dashboard
                           </Link>
                         )
-      }
+        }
                         <Link
                           to="/profile/1"
                           className="block hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 text-gray-700 dark:text-gray-300 text-sm"
                           onClick={() => setIsProfileMenuOpen(false)
-      }
+        }
                         >
                           <User size={
-        16
-      } className="inline mr-2" />
+          16
+        } className="inline mr-2" />
                           Profile
                         </Link>
                         <button
                           onClick={() => {
                             handleLogout();
                             setIsProfileMenuOpen(false);
+          }
         }
-      }
                           className="block hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 w-full text-gray-700 dark:text-gray-300 text-sm text-left"
                         >
                           <LogOut size={
-        16
-      } className="inline mr-2" />
+          16
+        } className="inline mr-2" />
                           Sign out
                         </button>
                       </div>
                     </div>
                   )
-    }
+      }
                 </div>
               </div>
             ) : (
@@ -234,20 +377,20 @@ const Header = () => {
                 </Link>
               </div>
             )
-  }
+    }
 
             <button
               className="md:hidden hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors ml-2"
               onClick={toggleMenu
-  }
+    }
               aria-label="Toggle menu"
             >
               {isMenuOpen ? <X size={
-      24
-    } /> : <Menu size={
-      24
-    } />
-  }
+        24
+      } /> : <Menu size={
+        24
+      } />
+    }
             </button>
           </div>
         </div>
@@ -260,23 +403,23 @@ const Header = () => {
             {navigation.map((item) => (
               <Link
                 key={item.name
-      }
+        }
                 to={item.path
-      }
+        }
                 className={`${
                   location.pathname === item.path
                     ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/60'
-        } block px-3 py-2 rounded-md text-base font-medium transition-colors`
-      }
+          } block px-3 py-2 rounded-md text-base font-medium transition-colors`
+        }
                 onClick={() => setIsMenuOpen(false)
-      }
+        }
               >
                 {item.name
-      }
+        }
               </Link>
             ))
-    }
+      }
 
             {isLoggedIn ? (
               <>
@@ -284,7 +427,7 @@ const Header = () => {
                   to="/profile/1"
                   className="block hover:bg-gray-50 dark:hover:bg-gray-800/60 px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 text-base transition-colors"
                   onClick={() => setIsMenuOpen(false)
-      }
+        }
                 >
                   Profile
                 </Link>
@@ -293,18 +436,18 @@ const Header = () => {
                     to="/admin/dashboard"
                     className="block hover:bg-gray-50 dark:hover:bg-gray-800/60 px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 text-base transition-colors"
                     onClick={() => setIsMenuOpen(false)
-        }
+          }
                   >
                     Admin Dashboard
                   </Link>
                 )
-      }
+        }
                 <button
                   onClick={() => {
                     handleLogout();
                     setIsMenuOpen(false);
+          }
         }
-      }
                   className="block hover:bg-gray-50 dark:hover:bg-gray-800/60 px-3 py-2 rounded-md w-full font-medium text-gray-700 dark:text-gray-300 text-base text-left transition-colors"
                 >
                   Sign out
@@ -316,7 +459,7 @@ const Header = () => {
                   to="/login"
                   className="block hover:bg-gray-50 dark:hover:bg-gray-800/60 px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 text-base transition-colors"
                   onClick={() => setIsMenuOpen(false)
-      }
+        }
                 >
                   Log in
                 </Link>
@@ -324,19 +467,19 @@ const Header = () => {
                   to="/register"
                   className="block bg-teal-600 hover:bg-teal-700 mt-2 px-3 py-2 rounded-md font-medium text-white text-base transition-colors"
                   onClick={() => setIsMenuOpen(false)
-      }
+        }
                 >
                   Sign up
                 </Link>
               </div>
             )
-    }
+      }
           </div>
         </div>
       )
-  }
+    }
     </header>
   );
-};
+  };
 
 export default Header;

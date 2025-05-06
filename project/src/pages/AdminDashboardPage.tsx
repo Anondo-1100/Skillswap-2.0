@@ -4,17 +4,17 @@ import { useNavigate
 } from 'react-router-dom';
 import {
   Users, BookOpen, AlertTriangle, Settings, Activity,
-  Shield, Ban, Check, X, RefreshCw
+  Shield, Ban, Check, X, RefreshCw, MessageSquare, Archive, Trash2, Send
 } from 'lucide-react';
 import { adminService
 } from '../services/adminService';
-import { AdminStats, UserManagement, SkillModeration
+import { AdminStats, UserManagement, SkillModeration, UserMessage
 } from '../types/admin';
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab
-  ] = useState<'overview' | 'users' | 'skills' | 'reports' | 'settings'>('overview');
+  ] = useState<'overview' | 'users' | 'skills' | 'reports' | 'messages' | 'settings'>('overview');
   const [stats, setStats
   ] = useState<AdminStats | null>(null);
   const [users, setUsers
@@ -23,10 +23,16 @@ const AdminDashboardPage = () => {
   ] = useState<SkillModeration[]>([]);
   const [reports, setReports
   ] = useState<any[]>([]);
+  const [messages, setMessages
+  ] = useState<UserMessage[]>([]);
   const [isLoading, setIsLoading
   ] = useState(true);
   const [systemSettings, setSystemSettings
   ] = useState<any>(null);
+  const [replyingTo, setReplyingTo
+  ] = useState<number | null>(null);
+  const [replyContent, setReplyContent
+  ] = useState('');
 
   useEffect(() => {
     const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
@@ -42,13 +48,14 @@ const AdminDashboardPage = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [statsData, userData, skillsData, reportsData, settingsData
+      const [statsData, userData, skillsData, reportsData, settingsData, messagesData
       ] = await Promise.all([
         adminService.getAdminStats(),
         adminService.getUsers(),
         adminService.getSkills(),
         adminService.getReports(),
-        adminService.getSystemSettings()
+        adminService.getSystemSettings(),
+        adminService.getMessages()
       ]);
 
       setStats(statsData);
@@ -56,6 +63,7 @@ const AdminDashboardPage = () => {
       setSkills(skillsData);
       setReports(reportsData);
       setSystemSettings(settingsData);
+      setMessages(messagesData);
     } catch (error) {
       console.error('Error loading admin data:', error);
     }
@@ -67,13 +75,12 @@ const AdminDashboardPage = () => {
       if (action === 'delete') {
         await adminService.deleteUser(userId);
         setUsers(users.filter(u => u.id !== userId));
-        // Reload stats after deletion
         const statsData = await adminService.getAdminStats();
         setStats(statsData);
       } else {
         await adminService.updateUserStatus(userId, action === 'activate' ? 'active' : 'suspended');
-        setUsers(users.map(user => 
-          user.id === userId 
+        setUsers(users.map(user =>
+          user.id === userId
             ? { ...user, status: action === 'activate' ? 'active' : 'suspended'
         }
             : user
@@ -89,18 +96,16 @@ const AdminDashboardPage = () => {
       if (action === 'delete') {
         await adminService.deleteSkill(skillId);
         setSkills(skills.filter(s => s.id !== skillId));
-        // Reload stats after deletion
         const statsData = await adminService.getAdminStats();
         setStats(statsData);
       } else {
         await adminService.updateSkillStatus(skillId, action === 'approve' ? 'active' : 'rejected');
-        setSkills(skills.map(skill => 
-          skill.id === skillId 
+        setSkills(skills.map(skill =>
+          skill.id === skillId
             ? { ...skill, status: action === 'approve' ? 'active' : 'rejected', lastModified: new Date().toISOString()
         }
             : skill
         ));
-        // Reload stats after status change
         const statsData = await adminService.getAdminStats();
         setStats(statsData);
       }
@@ -112,13 +117,51 @@ const AdminDashboardPage = () => {
   const handleReportAction = async (reportId: number, action: 'approve' | 'reject') => {
     try {
       await adminService.handleReport(reportId, action);
-      // Remove the handled report from the list
       setReports(reports.filter(r => r.id !== reportId));
-      // Reload stats after handling report
       const statsData = await adminService.getAdminStats();
       setStats(statsData);
     } catch (error) {
       console.error('Error handling report action:', error);
+    }
+  };
+
+  const handleMessageAction = async (messageId: number, action: 'read' | 'archive' | 'delete' | 'reply') => {
+    try {
+      if (action === 'reply') {
+        await adminService.replyToMessage(messageId, 'Admin', replyContent);
+        setMessages(messages.map(msg => 
+          msg.id === messageId 
+            ? { 
+                ...msg, 
+                status: 'read',
+                reply: {
+                  id: Date.now(),
+                  messageId,
+                  adminName: 'Admin',
+                  content: replyContent,
+                  createdAt: new Date().toISOString()
+          }
+        }
+            : msg
+        ));
+        setReplyingTo(null);
+        setReplyContent('');
+      } else if (action === 'delete') {
+        await adminService.deleteMessage(messageId);
+        setMessages(messages.filter(msg => msg.id !== messageId));
+      } else {
+        await adminService.updateMessageStatus(messageId, action);
+        setMessages(messages.map(msg => 
+          msg.id === messageId 
+            ? { ...msg, status: action
+        }
+            : msg
+        ));
+      }
+      const statsData = await adminService.getAdminStats();
+      setStats(statsData);
+    } catch (error) {
+      console.error('Error handling message action:', error);
     }
   };
 
@@ -160,6 +203,8 @@ const AdminDashboardPage = () => {
       { id: 'skills', name: 'Skills', icon: BookOpen
       },
       { id: 'reports', name: 'Reports', icon: AlertTriangle
+      },
+      { id: 'messages', name: 'Messages', icon: MessageSquare
       },
       { id: 'settings', name: 'Settings', icon: Settings
       }
@@ -443,6 +488,172 @@ const AdminDashboardPage = () => {
                       </div>
                     </div>
                   ))
+    }
+                </div>
+              </div>
+            </div>
+          )
+  }
+
+          {activeTab === 'messages' && (
+            <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Message Management</h3>
+                <div className="space-y-4">
+                  {messages.length === 0 ? (
+                    <p className="text-gray-500 dark:text-gray-400">No messages to display.</p>
+                  ) : (
+                    messages.map((message) => (
+                      <div 
+                        key={message.id
+      } 
+                        className={`bg-gray-50 dark:bg-gray-700 p-4 rounded-lg ${
+                          message.status === 'new' ? 'border-l-4 border-teal-500' : ''
+        }`
+      }
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                                {message.name
+      }
+                              </h4>
+                              {message.status === 'new' && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200">
+                                  New
+                                </span>
+                              )
+      }
+                              {message.status === 'archived' && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200">
+                                  Archived
+                                </span>
+                              )
+      }
+                            </div>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                              {message.email
+      }
+                            </p>
+                            <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                              {message.message
+      }
+                            </p>
+                            <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+                              Received: {new Date(message.createdAt).toLocaleString()
+      }
+                            </p>
+
+                            {message.reply && (
+                              <div className="mt-4 pl-4 border-l-2 border-teal-500">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                    Your Reply
+                                  </span>
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    {new Date(message.reply.createdAt).toLocaleString()
+        }
+                                  </span>
+                                </div>
+                                <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                                  {message.reply.content
+        }
+                                </p>
+                              </div>
+                            )
+      }
+
+                            {replyingTo === message.id && (
+                              <div className="mt-4">
+                                <textarea
+                                  value={replyContent
+        }
+                                  onChange={(e) => setReplyContent(e.target.value)
+        }
+                                  placeholder="Type your reply..."
+                                  rows={
+          3
+        }
+                                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                />
+                                <div className="mt-2 flex justify-end space-x-2">
+                                  <button
+                                    onClick={() => {
+                                      setReplyingTo(null);
+                                      setReplyContent('');
+          }
+        }
+                                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-xs font-medium rounded text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() => handleMessageAction(message.id, 'reply')
+        }
+                                    disabled={!replyContent.trim()
+        }
+                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    <Send className="h-4 w-4 mr-1" />
+                                    Send Reply
+                                  </button>
+                                </div>
+                              </div>
+                            )
+      }
+                          </div>
+                          <div className="flex space-x-2">
+                            {message.status === 'new' && (
+                              <button
+                                onClick={() => handleMessageAction(message.id, 'read')
+        }
+                                className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-teal-600 hover:bg-teal-700"
+                                title="Mark as Read"
+                              >
+                                <Check className="h-4 w-4 mr-1" />
+                                Mark as Read
+                              </button>
+                            )
+      }
+                            {!message.reply && (
+                              <button
+                                onClick={() => setReplyingTo(message.id)
+        }
+                                className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700"
+                                title="Reply to Message"
+                              >
+                                <MessageSquare className="h-4 w-4 mr-1" />
+                                Reply
+                              </button>
+                            )
+      }
+                            {message.status !== 'archived' && (
+                              <button
+                                onClick={() => handleMessageAction(message.id, 'archive')
+        }
+                                className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500"
+                                title="Archive Message"
+                              >
+                                <Archive className="h-4 w-4 mr-1" />
+                                Archive
+                              </button>
+                            )
+      }
+                            <button
+                              onClick={() => handleMessageAction(message.id, 'delete')
+      }
+                              className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700"
+                              title="Delete Message"
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )
     }
                 </div>
               </div>
