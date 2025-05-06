@@ -12,22 +12,20 @@ import SearchPage from './pages/SearchPage';
 import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import ChatPage from './pages/ChatPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import ContactPage from './pages/ContactPage';
 
 function App() {
   const [isLoading, setIsLoading
   ] = useState(true);
 
   useEffect(() => {
-    // Check and apply the saved theme on initial load
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
     }
-    // Simulate initial loading
     const timer = setTimeout(() => {
       setIsLoading(false);
     },
@@ -69,7 +67,7 @@ function App() {
   } />
               <Route path="/register" element={<RegisterPage />
   } />
-              <Route path="/chat" element={<ChatPage />
+              <Route path="/contact" element={<ContactPage />
   } />
               <Route path="/admin/login" element={<AdminLoginPage />
   } />

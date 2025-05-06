@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate
 } from 'react-router-dom';
 import { ThemeContext
 } from '../../contexts/ThemeContext';
-import { Menu, X, SunMoon, MessageSquare, Bell, User, LogOut, Shield
+import { Menu, X, SunMoon, Bell, User, LogOut, Shield, Phone
 } from 'lucide-react';
 
 const Header = () => {
@@ -39,6 +39,7 @@ const Header = () => {
   ] = useState('');
   const [isAdmin, setIsAdmin
   ] = useState(false);
+
   const location = useLocation();
   const navigate = useNavigate();
   const notificationsRef = useRef(null);
@@ -64,32 +65,19 @@ const Header = () => {
   [location
   ]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isNotificationsOpen &&
-        notificationsRef.current &&
-        notificationButtonRef.current &&
-        !notificationsRef.current.contains(event.target) &&
-        !notificationButtonRef.current.contains(event.target)) {
-        setIsNotificationsOpen(false);
-      }
+  const navigation = [
+    { name: 'Home', path: '/'
+    },
+    { name: 'Explore Skills', path: '/skills'
+    },
+    { name: 'Search', path: '/search'
+    },
+    { name: 'Contact', path: '/contact'
+    }
+  ];
 
-      if (isProfileMenuOpen &&
-        profileMenuRef.current &&
-        profileButtonRef.current &&
-        !profileMenuRef.current.contains(event.target) &&
-        !profileButtonRef.current.contains(event.target)) {
-        setIsProfileMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  },
-  [isNotificationsOpen, isProfileMenuOpen
-  ]);
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleProfileMenu = () => setIsProfileMenuOpen(!isProfileMenuOpen);
 
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
@@ -100,28 +88,6 @@ const Header = () => {
     setIsAdmin(false);
     setUserAvatar('');
     navigate('/');
-  };
-
-  const navigation = [
-    { name: 'Home', path: '/'
-    },
-    { name: 'Explore Skills', path: '/skills'
-    },
-    { name: 'Search', path: '/search'
-    },
-  ];
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const toggleProfileMenu = () => setIsProfileMenuOpen(!isProfileMenuOpen);
-
-  const unreadCount = notifications.filter(n => !n.isRead).length;
-
-  const handleNotificationClick = () => {
-    setIsNotificationsOpen(!isNotificationsOpen);
-    if (!isNotificationsOpen) {
-      setNotifications(notifications.map(n => ({ ...n, isRead: true
-      })));
-    }
   };
 
   return (
@@ -140,9 +106,10 @@ const Header = () => {
     }
                   to={item.path
     }
-                  className={`${location.pathname === item.path
-                    ? 'text-teal-600 dark:text-teal-400'
-                    : 'text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400'
+                  className={`${
+                    location.pathname === item.path
+                      ? 'text-teal-600 dark:text-teal-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400'
       } inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors`
     }
                 >
@@ -167,92 +134,30 @@ const Header = () => {
             </button>
 
             {isLoggedIn ? (
-              <>
-                <Link
-                  to="/messages"
-                  className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
+              <div className="relative ml-4 flex items-center space-x-4">
+                <button
+                  ref={notificationButtonRef
+    }
+                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)
+    }
+                  className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors relative"
                 >
-                  <MessageSquare size={
+                  <Bell size={
       20
     } />
-                </Link>
-                <div className="relative">
-                  <button
-                    ref={notificationButtonRef
-    }
-                    onClick={handleNotificationClick
-    }
-                    className="hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
-                  >
-                    <Bell size={
-      20
-    } />
-                    {unreadCount > 0 && (
-                      <span className="-top-1 -right-1 absolute flex justify-center items-center bg-red-500 rounded-full w-5 h-5 text-white text-xs">
-                        {unreadCount
-      }
-                      </span>
-                    )
-    }
-                  </button>
-
-                  {isNotificationsOpen && (
-                    <div
-                      ref={notificationsRef
-      }
-                      className="right-0 z-50 absolute bg-white dark:bg-gray-800 ring-opacity-5 shadow-lg mt-2 rounded-md focus:outline-none ring-1 ring-black w-80"
-                    >
-                      <div className="p-4 border-gray-200 dark:border-gray-700 border-b">
-                        <h3 className="font-medium text-gray-900 dark:text-white text-lg">Notifications</h3>
-                      </div>
-                      <div className="max-h-96 overflow-y-auto">
-                        {notifications.length > 0 ? (
-                          notifications.map((notification) => (
-                            <div
-                              key={notification.id
-        }
-                              className={`p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 ${!notification.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-          }`
-        }
-                            >
-                              <p className="font-medium text-gray-900 dark:text-white">{notification.title
-        }</p>
-                              <p className="text-gray-600 dark:text-gray-400 text-sm">{notification.message
-        }</p>
-                              <p className="mt-1 text-gray-500 dark:text-gray-500 text-xs">{notification.time
-        }</p>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="p-4 text-gray-500 dark:text-gray-400 text-center">
-                            No notifications
-                          </div>
-                        )
-      }
-                      </div>
-                      {notifications.length > 0 && (
-                        <div className="p-4 border-gray-200 dark:border-gray-700 border-t">
-                          <button
-                            onClick={() => setNotifications([])
-        }
-                            className="text-teal-600 hover:text-teal-700 dark:hover:text-teal-300 dark:text-teal-400 text-sm"
-                          >
-                            Clear all
-                          </button>
-                        </div>
-                      )
-      }
-                    </div>
+                  {notifications.filter(n => !n.isRead).length > 0 && (
+                    <span className="absolute top-0 right-0 block bg-red-500 rounded-full w-2 h-2"></span>
                   )
     }
-                </div>
-                <div className="relative ml-2">
+                </button>
+
+                <div className="relative">
                   <button
                     ref={profileButtonRef
     }
                     onClick={toggleProfileMenu
     }
-                    className="flex items-center hover:bg-gray-100 dark:hover:bg-gray-800 p-1 rounded-full transition-colors"
+                    className="flex items-center"
                   >
                     <img
                       src={userAvatar || "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg"
@@ -312,9 +217,9 @@ const Header = () => {
                   )
     }
                 </div>
-              </>
+              </div>
             ) : (
-              <div className="hidden md:flex md:items-center md:space-x-2">
+              <div className="hidden md:flex md:items-center md:space-x-2 ml-4">
                 <Link
                   to="/login"
                   className="px-4 py-2 font-medium text-gray-700 hover:text-teal-600 dark:hover:text-teal-400 dark:text-gray-300 text-sm transition-colors"
@@ -332,7 +237,7 @@ const Header = () => {
   }
 
             <button
-              className="md:hidden hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors"
+              className="md:hidden hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-md text-gray-700 dark:text-gray-300 transition-colors ml-2"
               onClick={toggleMenu
   }
               aria-label="Toggle menu"
@@ -358,9 +263,10 @@ const Header = () => {
       }
                 to={item.path
       }
-                className={`${location.pathname === item.path
-                  ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/60'
+                className={`${
+                  location.pathname === item.path
+                    ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/60'
         } block px-3 py-2 rounded-md text-base font-medium transition-colors`
       }
                 onClick={() => setIsMenuOpen(false)
