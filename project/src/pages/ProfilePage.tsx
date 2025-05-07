@@ -1,52 +1,53 @@
+/* eslint-disable */
 import { useState, useEffect
-} from 'react';
-import { useParams
-} from 'react-router-dom';
+} from 'react'
+import { useParams, Link, useLocation
+} from 'react-router-dom'
 import { MapPin, Calendar, Award, Star, Share2, Flag, Phone, Mail, Edit2, X, Check, Upload, MessageCircle, Facebook, Clock
-} from 'lucide-react';
-import SkillCard from '../components/skills/SkillCard';
+} from 'lucide-react'
+import SkillCard from '../components/skills/SkillCard'
 
 interface Skill {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  level: string;
-  author: string;
-  authorImage: string;
-  rating: number;
-  reviews: number;
-  teachingMode: 'swap' | 'paid';
-  price?: number;
+  id: number
+  title: string
+  description: string
+  category: string
+  level: string
+  author: string
+  authorImage: string
+  rating: number
+  reviews: number
+  teachingMode: 'swap' | 'paid'
+  price?: number
 }
 
 interface Message {
-  id: number;
-  message: string;
-  createdAt: string;
+  id: number
+  message: string
+  createdAt: string
   reply?: {
-    content: string;
-    createdAt: string;
-  };
-  status: 'archived' | 'active';
+    content: string
+    createdAt: string
+  }
+  status: 'archived' | 'active'
 }
 
 interface UserData {
-  id: string;
-  name: string;
-  username: string;
-  email: string;
-  phone: string;
-  whatsapp?: string;
-  facebook?: string;
-  avatar: string;
-  location: string;
-  joinedDate: string;
-  verified: boolean;
-  bio: string;
-  teachingSkills: Skill[];
-  learningSkills: Skill[];
-  messages?: Message[];
+  id: string
+  name: string
+  username: string
+  email: string
+  phone: string
+  whatsapp?: string
+  facebook?: string
+  avatar: string
+  location: string
+  joinedDate: string
+  verified: boolean
+  bio: string
+  teachingSkills: Skill[]
+  learningSkills: Skill[]
+  messages?: Message[]
 }
 
 const USER_DATA: UserData = {
@@ -54,9 +55,9 @@ const USER_DATA: UserData = {
   name: 'Alex Johnson',
   username: 'alexj',
   email: 'alex@example.com',
-  phone: '+1 (555) 123-4567',
-  whatsapp: '+1 (555) 123-4567',
-  facebook: 'facebook.com/alexjohnson',
+  phone: '+1-555-123-4567',
+  whatsapp: '+15551234567',
+  facebook: 'https: //facebook.com/alexjohnson',
   avatar: 'https: //images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
   location: 'San Francisco, CA',
   joinedDate: 'January 2023',
@@ -109,7 +110,7 @@ const USER_DATA: UserData = {
       message: 'Can you help me with advanced React patterns?',
       createdAt: '2023-03-01T10: 00: 00Z',
       reply: {
-        content: 'Sure, I can help you with that. Let’s schedule a session.',
+        content: 'Sure, I can help you with that. Let\'s schedule a session.',
         createdAt: '2023-03-02T12: 00: 00Z'
       },
       status: 'active'
@@ -121,22 +122,23 @@ const USER_DATA: UserData = {
       status: 'active'
     }
   ]
-};
+}
 
 const ProfilePage = () => {
   const { id
   } = useParams<{ id: string
-  }>();
+  }>()
+  const location = useLocation()
   const [user, setUser
-  ] = useState(USER_DATA);
+  ] = useState(USER_DATA)
   const [activeTab, setActiveTab
-  ] = useState('teaching');
+  ] = useState('teaching')
   const [isLoading, setIsLoading
-  ] = useState(true);
+  ] = useState(true)
   const [isEditing, setIsEditing
-  ] = useState(false);
+  ] = useState(false)
   const [showContactInfo, setShowContactInfo
-  ] = useState(false);
+  ] = useState(false)
   const [editForm, setEditForm
   ] = useState({
     name: '',
@@ -148,25 +150,25 @@ const ProfilePage = () => {
     location: '',
     bio: '',
     avatar: ''
-  });
+  })
   const [showReportModal, setShowReportModal
-  ] = useState(false);
+  ] = useState(false)
   const [reportForm, setReportForm
   ] = useState({
     reason: '',
     details: ''
-  });
+  })
   const [isSubmittingReport, setIsSubmittingReport
-  ] = useState(false);
+  ] = useState(false)
   const [reportStatus, setReportStatus
-  ] = useState<'success' | 'error' | null>(null);
+  ] = useState<'success' | 'error' | null>(null)
 
   useEffect(() => {
     const fetchUser = async () => {
-      setIsLoading(true);
-      const storedUserData = localStorage.getItem('userData');
-      const userData = storedUserData ? JSON.parse(storedUserData) : USER_DATA;
-      setUser(userData);
+      setIsLoading(true)
+      const storedUserData = localStorage.getItem('userData')
+      const userData = storedUserData ? JSON.parse(storedUserData) : USER_DATA
+      setUser(userData)
       setEditForm({
         name: userData.name,
         username: userData.username,
@@ -177,16 +179,22 @@ const ProfilePage = () => {
         location: userData.location,
         bio: userData.bio,
         avatar: userData.avatar
-      });
-      setIsLoading(false);
-    };
+      })
+      setIsLoading(false)
 
-    fetchUser();
+      // Check if contact info should be shown based on query parameter
+      const searchParams = new URLSearchParams(location.search)
+      if (searchParams.get('showContact') === 'true') {
+        setShowContactInfo(true)
+      }
+    }
+
+    fetchUser()
     window.scrollTo({ top: 0, behavior: 'smooth'
-    });
+    })
   },
-  [id
-  ]);
+  [id, location.search
+  ])
 
   const handleEditSubmit = async () => {
     const updatedUser = {
@@ -200,12 +208,12 @@ const ProfilePage = () => {
       location: editForm.location,
       bio: editForm.bio,
       avatar: editForm.avatar || user.avatar
-    };
+    }
 
-    setUser(updatedUser);
-    localStorage.setItem('userData', JSON.stringify(updatedUser));
-    setIsEditing(false);
-  };
+    setUser(updatedUser)
+    localStorage.setItem('userData', JSON.stringify(updatedUser))
+    setIsEditing(false)
+  }
 
   const handleEditToggle = () => {
     if (isEditing) {
@@ -218,41 +226,41 @@ const ProfilePage = () => {
         facebook: user.facebook || '',
         location: user.location,
         bio: user.bio,
-      });
+      })
     }
-    setIsEditing(!isEditing);
-  };
+    setIsEditing(!isEditing)
+  }
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value
-    } = e.target;
+    } = e.target
     setEditForm(prev => ({
       ...prev,
       [name
       ]: value,
-    }));
-  };
+    }))
+  }
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[
       0
-    ];
+    ]
     if (file) {
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onloadend = () => {
-        const result = reader.result as string;
+        const result = reader.result as string
         setEditForm(prev => ({
           ...prev,
           avatar: result
-        }));
-      };
-      reader.readAsDataURL(file);
+        }))
+      }
+      reader.readAsDataURL(file)
     }
-  };
+  }
 
   const toggleContactInfo = () => {
-    setShowContactInfo(!showContactInfo);
-  };
+    setShowContactInfo(!showContactInfo)
+  }
 
   const handleShare = async () => {
     const shareData = {
@@ -261,52 +269,54 @@ const ProfilePage = () => {
       text: `Check out ${user.name
       }'s skills and expertise on SkillSwap!`,
       url: window.location.href.replace('localhost: 5173', 'skillswap')
-    };
+    }
 
     try {
       if (navigator.share) {
-        await navigator.share(shareData);
+        await navigator.share(shareData)
       } else {
-        await navigator.clipboard.writeText(shareData.url);
-        alert('Profile link copied to clipboard!');
+        await navigator.clipboard.writeText(shareData.url)
+        alert('Profile link copied to clipboard!')
       }
     } catch (error) {
-      console.error('Error sharing:', error);
+      console.error('Error sharing profile:', error)
+      alert('Failed to share profile. Please try again.')
     }
-  };
+  }
 
   const handleReportSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmittingReport(true);
-    setReportStatus(null);
+    e.preventDefault()
+    setIsSubmittingReport(true)
+    setReportStatus(null)
 
     try {
       await new Promise(resolve => setTimeout(resolve,
-      1000));
-      setReportStatus('success');
+      1000))
+      setReportStatus('success')
       setReportForm({ reason: '', details: ''
-      });
+      })
       setTimeout(() => {
-        setShowReportModal(false);
-        setReportStatus(null);
+        setShowReportModal(false)
+        setReportStatus(null)
       },
-      2000);
-    } catch (error) {
-      setReportStatus('error');
+      2000)
+    } catch (err) {
+      console.error('Error submitting report:', err)
+      setReportStatus('error')
     } finally {
-      setIsSubmittingReport(false);
+      setIsSubmittingReport(false)
     }
-  };
+  }
 
   const handleReportChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value
-    } = e.target;
+    } = e.target
     setReportForm(prev => ({
       ...prev,
       [name
       ]: value
-    }));
-  };
+    }))
+  }
 
   if (isLoading) {
     return (
@@ -318,7 +328,7 @@ const ProfilePage = () => {
           <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64"></div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -615,8 +625,16 @@ const ProfilePage = () => {
                           <Phone size={
           16
         } className="mr-2" />
-                          <span>{user.phone
-        }</span>
+                          <a 
+                            href={`tel:${user.phone.replace(/[^0-9+
+            ]/g, '')
+          }`
+        }
+                            className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                          >
+                            {user.phone
+        }
+                          </a>
                         </div>
                         {user.whatsapp && (
                           <a 
@@ -635,7 +653,7 @@ const ProfilePage = () => {
           }
                         {user.facebook && (
                           <a 
-                            href={`https: //facebook.com/${user.facebook.split('facebook.com/').pop()}`}
+                            href={`https: //facebook.com/${user.facebook?.replace('facebook.com/', '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400"
@@ -911,34 +929,39 @@ const ProfilePage = () => {
               <div className="space-y-6 mt-8">
                 <div className="pb-6 border-gray-200 dark:border-gray-700 border-b">
                   <div className="flex items-center mb-3">
-                    <img
-                      src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg"
-                      alt="Sarah"
-                      className="mr-3 rounded-full w-10 h-10 object-cover"
-                    />
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Sarah L.</div>
-                      <div className="flex items-center">
-                        <div className="flex text-yellow-500">
-                          <Star size={
+                    <Link 
+                      to="/profile/sarah-l"
+                      className="flex items-center hover:text-teal-600 dark:hover:text-teal-400"
+                    >
+                      <img
+                        src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg"
+                        alt="Sarah"
+                        className="mr-3 rounded-full w-10 h-10 object-cover"
+                      />
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">Sarah L.</div>
+                        <div className="flex items-center">
+                          <div className="flex text-yellow-500">
+                            <Star size={
             14
           } className="fill-current" />
-                          <Star size={
+                            <Star size={
             14
           } className="fill-current" />
-                          <Star size={
+                            <Star size={
             14
           } className="fill-current" />
-                          <Star size={
+                            <Star size={
             14
           } className="fill-current" />
-                          <Star size={
+                            <Star size={
             14
           } className="fill-current" />
+                          </div>
+                          <span className="ml-2 text-gray-500 dark:text-gray-400 text-xs">2 weeks ago</span>
                         </div>
-                        <span className="ml-2 text-gray-500 dark:text-gray-400 text-xs">2 weeks ago</span>
                       </div>
-                    </div>
+                    </Link>
                   </div>
                   <p className="text-gray-700 dark:text-gray-300">
                     Alex is an amazing JavaScript teacher! He explained complex concepts in a way that was easy to understand. I went from knowing nothing to building my own web apps. Highly recommend!
@@ -947,34 +970,39 @@ const ProfilePage = () => {
 
                 <div className="pb-6 border-gray-200 dark:border-gray-700 border-b">
                   <div className="flex items-center mb-3">
-                    <img
-                      src="https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg"
-                      alt="Michael"
-                      className="mr-3 rounded-full w-10 h-10 object-cover"
-                    />
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Michael T.</div>
-                      <div className="flex items-center">
-                        <div className="flex text-yellow-500">
-                          <Star size={
+                    <Link 
+                      to="/profile/michael-t"
+                      className="flex items-center hover:text-teal-600 dark:hover:text-teal-400"
+                    >
+                      <img
+                        src="https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg"
+                        alt="Michael"
+                        className="mr-3 rounded-full w-10 h-10 object-cover"
+                      />
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">Michael T.</div>
+                        <div className="flex items-center">
+                          <div className="flex text-yellow-500">
+                            <Star size={
             14
           } className="fill-current" />
-                          <Star size={
+                            <Star size={
             14
           } className="fill-current" />
-                          <Star size={
+                            <Star size={
             14
           } className="fill-current" />
-                          <Star size={
+                            <Star size={
             14
           } className="fill-current" />
-                          <Star size={
+                            <Star size={
             14
           } className="fill-current" />
+                          </div>
+                          <span className="ml-2 text-gray-500 dark:text-gray-400 text-xs">1 month ago</span>
                         </div>
-                        <span className="ml-2 text-gray-500 dark:text-gray-400 text-xs">1 month ago</span>
                       </div>
-                    </div>
+                    </Link>
                   </div>
                   <p className="text-gray-700 dark:text-gray-300">
                     I took Alex's React course and it was incredibly helpful. He has a deep understanding of the framework and shares practical tips that you won't find in the documentation. Thanks to his guidance, I landed my first dev job!
@@ -1024,105 +1052,105 @@ const ProfilePage = () => {
                       Please provide details about why you're reporting this user. Our team will review your report and take appropriate action.
                     </p>
                   </div>
-                </div>
-              </div>
 
-              <form onSubmit={handleReportSubmit
+                  <form onSubmit={handleReportSubmit
           } className="mt-6 space-y-4">
-                <div>
-                  <label htmlFor="reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Reason for Report
-                  </label>
-                  <select
-                    id="reason"
-                    name="reason"
-                    value={reportForm.reason
+                    <div>
+                      <label htmlFor="reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Reason for Report
+                      </label>
+                      <select
+                        id="reason"
+                        name="reason"
+                        value={reportForm.reason
           }
-                    onChange={handleReportChange
+                        onChange={handleReportChange
           }
-                    required
-                    className="mt-1 block w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-teal-500 focus:border-teal-500"
-                  >
-                    <option value="">Select a reason</option>
-                    <option value="inappropriate">Inappropriate Behavior</option>
-                    <option value="spam">Spam or Misleading</option>
-                    <option value="fake">Fake Profile</option>
-                    <option value="harassment">Harassment</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
+                        required
+                        className="mt-1 block w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-teal-500 focus:border-teal-500"
+                      >
+                        <option value="">Select a reason</option>
+                        <option value="inappropriate">Inappropriate Behavior</option>
+                        <option value="spam">Spam or Misleading</option>
+                        <option value="fake">Fake Profile</option>
+                        <option value="harassment">Harassment</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
 
-                <div>
-                  <label htmlFor="details" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Additional Details
-                  </label>
-                  <textarea
-                    id="details"
-                    name="details"
-                    rows={
+                    <div>
+                      <label htmlFor="details" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Additional Details
+                      </label>
+                      <textarea
+                        id="details"
+                        name="details"
+                        rows={
             4
           }
-                    value={reportForm.details
+                        value={reportForm.details
           }
-                    onChange={handleReportChange
+                        onChange={handleReportChange
           }
-                    required
-                    className="mt-1 block w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-teal-500 focus:border-teal-500"
-                    placeholder="Please provide specific details about the issue..."
-                  />
-                </div>
+                        required
+                        className="mt-1 block w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-teal-500 focus:border-teal-500"
+                        placeholder="Please provide specific details about the issue..."
+                      />
+                    </div>
 
-                {reportStatus === 'success' && (
-                  <div className="bg-green-50 dark:bg-green-900/30 p-3 rounded-md text-green-800 dark:text-green-200 text-sm">
-                    Report submitted successfully. Thank you for helping keep SkillSwap safe.
-                  </div>
-                )
-          }
-
-                {reportStatus === 'error' && (
-                  <div className="bg-red-50 dark:bg-red-900/30 p-3 rounded-md text-red-800 dark:text-red-200 text-sm">
-                    There was an error submitting your report. Please try again.
-                  </div>
-                )
-          }
-
-                <div className="mt-6 sm:flex sm:flex-row-reverse">
-                  <button
-                    type="submit"
-                    disabled={isSubmittingReport
-          }
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
-                  >
-                    {isSubmittingReport ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Submitting...
-                      </>
-                    ) : (
-                      'Submit Report'
+                    {reportStatus === 'success' && (
+                      <div className="bg-green-50 dark:bg-green-900/30 p-3 rounded-md text-green-800 dark:text-green-200 text-sm">
+                        Report submitted successfully. Thank you for helping keep SkillSwap safe.
+                      </div>
                     )
           }
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowReportModal(false)
+
+                    {reportStatus === 'error' && (
+                      <div className="bg-red-50 dark:bg-red-900/30 p-3 rounded-md text-red-800 dark:text-red-200 text-sm">
+                        There was an error submitting your report. Please try again.
+                      </div>
+                    )
           }
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:mt-0 sm:w-auto sm:text-sm"
-                  >
-                    Cancel
-                  </button>
+
+                    <div className="mt-6 sm:flex sm:flex-row-reverse">
+                      <button
+                        type="submit"
+                        disabled={isSubmittingReport
+          }
+                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+                      >
+                        {isSubmittingReport ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Submitting...
+                          </>
+                        ) : (
+                          'Submit Report'
+                        )
+          }
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowReportModal(false)
+          }
+                        className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:mt-0 sm:w-auto sm:text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
       )
         }
     </div>
-  );
-      };
+  )
+      }
 
-export default ProfilePage;
+export default ProfilePage

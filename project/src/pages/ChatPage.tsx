@@ -5,6 +5,8 @@ import { Search, Send, MessageCircle, MoreVertical, ChevronLeft, Shield, Bold, I
 import EmojiPicker,
 { EmojiClickData
 } from 'emoji-picker-react';
+import { Link
+} from 'react-router-dom';
 
 // Mock admin contact
 const ADMIN_CONTACT = {
@@ -127,35 +129,27 @@ const ChatPage = () => {
       <div className="mx-auto max-w-3xl">
         <div className="flex flex-col bg-white dark:bg-gray-800 shadow-xl rounded-lg h-screen">
           { /* Chat Header */}
-          <div className="flex justify-between items-center p-4 border-gray-200 dark:border-gray-700 border-b">
-            <div className="flex items-center">
-              <div className="relative">
-                <img
-                  src={ADMIN_CONTACT.avatar
+          <div className="flex items-center p-4 border-b dark:border-gray-700">
+            <Link 
+              to={`/profile/${ADMIN_CONTACT.name.toLowerCase().replace(' ', '-')
+    }`
   }
-                  alt={ADMIN_CONTACT.name
+              className="flex items-center hover:text-teal-600 dark:hover:text-teal-400"
+            >
+              <img
+                src={ADMIN_CONTACT.avatar
   }
-                  className="mr-3 rounded-full w-10 h-10"
-                />
-                <span className="block right-2 bottom-0 absolute bg-green-400 rounded-full ring-2 ring-white dark:ring-gray-800 w-2.5 h-2.5"></span>
-              </div>
+                alt={ADMIN_CONTACT.name
+  }
+                className="w-10 h-10 rounded-full object-cover mr-3"
+              />
               <div>
-                <h3 className="font-medium text-gray-900 dark:text-white text-base">
-                  {ADMIN_CONTACT.name
-  }
-                </h3>
-                <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs">
-                  <Shield className="w-3 h-3 mr-1" />
-                  <span>{ADMIN_CONTACT.role
-  }</span>
-                </div>
+                <h3 className="font-medium text-gray-900 dark:text-white">{ADMIN_CONTACT.name
+  }</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{ADMIN_CONTACT.role
+  }</p>
               </div>
-            </div>
-            <button className="hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full text-gray-500 dark:text-gray-400">
-              <MoreVertical size={
-    20
-  } />
-            </button>
+            </Link>
           </div>
 
           { /* Messages */}

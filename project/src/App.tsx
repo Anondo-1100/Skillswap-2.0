@@ -8,6 +8,7 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import HomePage from './pages/HomePage';
 import SkillsPage from './pages/SkillsPage';
+import SkillPage from './pages/SkillPage';
 import SearchPage from './pages/SearchPage';
 import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
@@ -58,6 +59,8 @@ function App() {
               <Route path="/" element={<HomePage />
   } />
               <Route path="/skills" element={<SkillsPage />
+  } />
+              <Route path="/skills/:id" element={<SkillPage />
   } />
               <Route path="/search" element={<SearchPage />
   } />

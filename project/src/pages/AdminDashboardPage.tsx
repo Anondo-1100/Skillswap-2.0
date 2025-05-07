@@ -1,6 +1,6 @@
 import { useEffect, useState
 } from 'react';
-import { useNavigate
+import { useNavigate, Link
 } from 'react-router-dom';
 import {
   Users, BookOpen, AlertTriangle, Settings, Activity,
@@ -387,8 +387,17 @@ const AdminDashboardPage = () => {
       }>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{skill.title
       }</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{skill.author
-      }</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                            <Link 
+                              to={`/profile/${skill.author.toLowerCase().replace(' ', '-')
+        }`
+      }
+                              className="hover:text-teal-600 dark:hover:text-teal-400"
+                            >
+                              {skill.author
+      }
+                            </Link>
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               skill.status === 'active'
