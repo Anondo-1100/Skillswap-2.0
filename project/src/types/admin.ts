@@ -33,7 +33,6 @@ export interface UserManagement {
     joinedDate: string;
     lastActive: string;
     skillsCount: number;
-    reportCount: number;
 }
 
 export interface SkillModeration {
@@ -42,9 +41,14 @@ export interface SkillModeration {
     author: string;
     category: string;
     status: 'active' | 'pending' | 'rejected';
-    reportCount: number;
     createdAt: string;
     lastModified: string;
+}
+
+export interface SystemHealth {
+    status: 'healthy' | 'warning' | 'critical';
+    lastChecked: string;
+    issues: number;
 }
 
 export interface AdminStats {
@@ -52,11 +56,6 @@ export interface AdminStats {
     activeUsers: number;
     totalSkills: number;
     pendingSkills: number;
-    activeReports: number;
     newMessages: number;
-    systemHealth: {
-        status: 'healthy' | 'warning' | 'critical';
-        lastChecked: string;
-        issues: number;
-    };
+    systemHealth: SystemHealth;
 }

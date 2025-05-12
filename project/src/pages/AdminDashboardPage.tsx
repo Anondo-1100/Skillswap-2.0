@@ -3,7 +3,7 @@ import { useEffect, useState
 import { useNavigate, Link
 } from 'react-router-dom';
 import {
-  Users, BookOpen, AlertTriangle, Settings, Activity,
+  Users, BookOpen, Settings, Activity,
   Shield, Ban, Check, X, RefreshCw, MessageSquare, Archive, Trash2, Send
 } from 'lucide-react';
 import { adminService
@@ -14,21 +14,19 @@ import { AdminStats, UserManagement, SkillModeration, UserMessage
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab
-  ] = useState<'overview' | 'users' | 'skills' | 'reports' | 'messages' | 'settings'>('overview');
+  ] = useState<'overview' | 'users' | 'skills' | 'messages' | 'settings'>('overview');
   const [stats, setStats
   ] = useState<AdminStats | null>(null);
   const [users, setUsers
   ] = useState<UserManagement[]>([]);
   const [skills, setSkills
   ] = useState<SkillModeration[]>([]);
-  const [reports, setReports
-  ] = useState<any[]>([]);
   const [messages, setMessages
   ] = useState<UserMessage[]>([]);
+  const [systemSettings, setSystemSettings
+  ] = useState(null);
   const [isLoading, setIsLoading
   ] = useState(true);
-  const [systemSettings, setSystemSettings
-  ] = useState<any>(null);
   const [replyingTo, setReplyingTo
   ] = useState<number | null>(null);
   const [replyContent, setReplyContent
@@ -48,12 +46,11 @@ const AdminDashboardPage = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [statsData, userData, skillsData, reportsData, settingsData, messagesData
+      const [statsData, userData, skillsData, settingsData, messagesData
       ] = await Promise.all([
         adminService.getAdminStats(),
         adminService.getUsers(),
         adminService.getSkills(),
-        adminService.getReports(),
         adminService.getSystemSettings(),
         adminService.getMessages()
       ]);
@@ -61,7 +58,6 @@ const AdminDashboardPage = () => {
       setStats(statsData);
       setUsers(userData);
       setSkills(skillsData);
-      setReports(reportsData);
       setSystemSettings(settingsData);
       setMessages(messagesData);
     } catch (error) {
@@ -111,17 +107,6 @@ const AdminDashboardPage = () => {
       }
     } catch (error) {
       console.error('Error handling skill action:', error);
-    }
-  };
-
-  const handleReportAction = async (reportId: number, action: 'approve' | 'reject') => {
-    try {
-      await adminService.handleReport(reportId, action);
-      setReports(reports.filter(r => r.id !== reportId));
-      const statsData = await adminService.getAdminStats();
-      setStats(statsData);
-    } catch (error) {
-      console.error('Error handling report action:', error);
     }
   };
 
@@ -202,8 +187,6 @@ const AdminDashboardPage = () => {
       },
       { id: 'skills', name: 'Skills', icon: BookOpen
       },
-      { id: 'reports', name: 'Reports', icon: AlertTriangle
-      },
       { id: 'messages', name: 'Messages', icon: MessageSquare
       },
       { id: 'settings', name: 'Settings', icon: Settings
@@ -257,18 +240,6 @@ const AdminDashboardPage = () => {
     }</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">{stats.pendingSkills
     } pending</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
-                <div className="flex items-center">
-                  <AlertTriangle className="h-8 w-8 text-yellow-500" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Reports</p>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">{stats.activeReports
-    }</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Needs attention</p>
                   </div>
                 </div>
               </div>
@@ -448,56 +419,6 @@ const AdminDashboardPage = () => {
     }
                     </tbody>
                   </table>
-                </div>
-              </div>
-            </div>
-          )
-  }
-
-          {activeTab === 'reports' && (
-            <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Report Management</h3>
-                <div className="space-y-4">
-                  {reports.map((report) => (
-                    <div key={report.id
-      } className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                            Report #{report.id
-      } - {report.type === 'user' ? 'User Report' : 'Skill Report'
-      }
-                          </h4>
-                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{report.reason
-      }</p>
-                          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                            Reported on: {new Date(report.createdAt).toLocaleDateString()
-      }
-                          </p>
-                        </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleReportAction(report.id, 'approve')
-      }
-                            className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700"
-                          >
-                            <Check className="h-4 w-4 mr-1" />
-                            Take Action
-                          </button>
-                          <button
-                            onClick={() => handleReportAction(report.id, 'reject')
-      }
-                            className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700"
-                          >
-                            <X className="h-4 w-4 mr-1" />
-                            Dismiss
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-    }
                 </div>
               </div>
             </div>
