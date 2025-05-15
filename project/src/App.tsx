@@ -2,6 +2,8 @@ import { useState, useEffect
 } from 'react';
 import { BrowserRouter as Router, Routes, Route
 } from 'react-router-dom';
+import { QueryClient, QueryClientProvider
+} from '@tanstack/react-query';
 import { ThemeProvider
 } from './contexts/ThemeContext';
 import { AuthProvider
@@ -21,6 +23,10 @@ import NotFoundPage from './pages/NotFoundPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ContactPage from './pages/ContactPage';
+import { ToastProvider
+} from './hooks/useToast';
+import ToastContainer from './components/ui/Toast';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 function App() {
   const [isLoading, setIsLoading
@@ -52,46 +58,78 @@ function App() {
       </div>
     );
   }
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: (failureCount, error: any) => {
+          // Don't retry on 401/403 errors
+          if (error?.response?.status === 401 || error?.response?.status === 403) {
+            return false;
+          }
+          return failureCount < 3;
+        },
+        staleTime: 5 * 60 * 1000, // 5 minutes
+      },
+      mutations: {
+        retry: false,
+        onError: (error: any) => {
+          // Handle authentication errors globally
+          if (error?.response?.status === 401) {
+            window.location.href = '/admin/login';
+          }
+        }
+      }
+    }
+  });
 
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <Router>
-          <AdminAuthProvider>
-            <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-              <Header />
-              <main className="flex-grow">
-                <Routes>
-                  <Route path="/" element={<HomePage />
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient
+  }>
+        <ToastProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <Router>
+                <AdminAuthProvider>
+                  <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+                    <Header />
+                    <main className="flex-grow">
+                      <Routes>
+                        <Route path="/" element={<HomePage />
   } />
-                  <Route path="/skills" element={<SkillsPage />
+                        <Route path="/skills" element={<SkillsPage />
   } />
-                  <Route path="/skills/:id" element={<SkillPage />
+                        <Route path="/skills/:id" element={<SkillPage />
   } />
-                  <Route path="/search" element={<SearchPage />
+                        <Route path="/search" element={<SearchPage />
   } />
-                  <Route path="/profile/:id" element={<ProfilePage />
+                        <Route path="/profile/:id" element={<ProfilePage />
   } />
-                  <Route path="/login" element={<LoginPage />
+                        <Route path="/login" element={<LoginPage />
   } />
-                  <Route path="/register" element={<RegisterPage />
+                        <Route path="/register" element={<RegisterPage />
   } />
-                  <Route path="/contact" element={<ContactPage />
+                        <Route path="/contact" element={<ContactPage />
   } />
-                  <Route path="/admin/login" element={<AdminLoginPage />
+                        <Route path="/admin/login" element={<AdminLoginPage />
   } />
-                  <Route path="/admin/dashboard" element={<AdminDashboardPage />
+                        <Route path="/admin/dashboard" element={<AdminDashboardPage />
   } />
-                  <Route path="*" element={<NotFoundPage />
+                        <Route path="*" element={<NotFoundPage />
   } />
-                </Routes>
-              </main>
-              <Footer />
-            </div>
-          </AdminAuthProvider>
-        </Router>
-      </ThemeProvider>
-    </AuthProvider>
+                      </Routes>
+                    </main>
+                    <Footer />
+                  </div>
+                  <ToastContainer />
+                </AdminAuthProvider>
+              </Router>
+            </ThemeProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

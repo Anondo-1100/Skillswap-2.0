@@ -2,39 +2,75 @@ import { useEffect, useState
 } from 'react';
 import { useNavigate, Link
 } from 'react-router-dom';
+import { useQuery, useMutation
+} from '@tanstack/react-query';
 import {
   Users, BookOpen, Settings, Activity,
   Shield, Ban, Check, X, RefreshCw, MessageSquare, Archive, Trash2, Send, LogOut, UserCircle
 } from 'lucide-react';
-import { adminService
-} from '../services/adminService';
+import { realAdminService as adminService
+} from '../services/realAdminService';
 import { AdminStats, UserManagement, SkillModeration, UserMessage
 } from '../types/admin';
 import { useAdminAuth
 } from '../contexts/AdminAuthContext';
+import { LoadingSpinner, ErrorMessage
+} from '../components/ui';
+import { useToast
+} from '../hooks/useToast';
 
 const AdminDashboardPage = () => {
+  const { showToast
+  } = useToast();
   const navigate = useNavigate();
   const { adminProfile, logoutAdmin
   } = useAdminAuth();
   const [activeTab, setActiveTab
   ] = useState<'overview' | 'users' | 'skills' | 'messages' | 'settings'>('overview');
-  const [stats, setStats
-  ] = useState<AdminStats | null>(null);
-  const [users, setUsers
-  ] = useState<UserManagement[]>([]);
-  const [skills, setSkills
-  ] = useState<SkillModeration[]>([]);
-  const [messages, setMessages
-  ] = useState<UserMessage[]>([]);
-  const [systemSettings, setSystemSettings
-  ] = useState(null);
-  const [isLoading, setIsLoading
-  ] = useState(true);
+
+  const statsQuery = useQuery({
+    queryKey: ['admin', 'stats'
+    ],
+    queryFn: () => adminService.getAdminStats(),
+  });
+
+  const usersQuery = useQuery({
+    queryKey: ['admin', 'users'
+    ],
+    queryFn: () => adminService.getUsers(),
+  });
+
+  const skillsQuery = useQuery({
+    queryKey: ['admin', 'skills'
+    ],
+    queryFn: () => adminService.getSkills(),
+  });
+
+  const messagesQuery = useQuery({
+    queryKey: ['admin', 'messages'
+    ],
+    queryFn: () => adminService.getMessages(),
+  });
+
+  const settingsQuery = useQuery({
+    queryKey: ['admin', 'settings'
+    ],
+    queryFn: () => adminService.getSystemSettings(),
+  });
+
+  const stats = statsQuery.data;
+  const users = usersQuery.data;
+  const skills = skillsQuery.data;
+  const messages = messagesQuery.data;
+  const systemSettings = settingsQuery.data;
+
   const [replyingTo, setReplyingTo
   ] = useState<number | null>(null);
   const [replyContent, setReplyContent
   ] = useState('');
+
+  const isLoading = statsQuery.isLoading || usersQuery.isLoading || skillsQuery.isLoading || messagesQuery.isLoading || settingsQuery.isLoading;
+  const isError = statsQuery.isError || usersQuery.isError || skillsQuery.isError || messagesQuery.isError || settingsQuery.isError;
 
   useEffect(() => {
     if (!adminProfile) {
@@ -69,97 +105,181 @@ const AdminDashboardPage = () => {
     setIsLoading(false);
   };
 
-  const handleUserAction = async (userId: string, action: 'activate' | 'suspend' | 'delete') => {
-    try {
+  const showActionResult = (action: string, success: boolean, itemType: string) => {
+    if (success) {
+      showToast(`Successfully ${action
+      } ${itemType
+      }`, 'success');
+    } else {
+      showToast(`Failed to ${action
+      } ${itemType
+      }. Please try again.`, 'error');
+    }
+  };
+
+  const userActionMutation = useMutation({
+    mutationFn: async ({ userId, action
+    }: { userId: string; action: 'activate' | 'suspend' | 'delete'
+    }) => {
       if (action === 'delete') {
         await adminService.deleteUser(userId);
-        setUsers(users.filter(u => u.id !== userId));
-        const statsData = await adminService.getAdminStats();
-        setStats(statsData);
       } else {
         await adminService.updateUserStatus(userId, action === 'activate' ? 'active' : 'suspended');
-        setUsers(users.map(user =>
-          user.id === userId
-            ? { ...user, status: action === 'activate' ? 'active' : 'suspended'
-        }
-            : user
-        ));
       }
-    } catch (error) {
-      console.error('Error handling user action:', error);
+    },
+    onSuccess: (_, variables) => {
+      showActionResult(variables.action,
+      true, 'user');
+      usersQuery.refetch();
+      statsQuery.refetch();
+    },
+    onError: (_, variables) => {
+      showActionResult(variables.action,
+      false, 'user');
     }
+  });
+
+  const handleUserAction = (userId: string, action: 'activate' | 'suspend' | 'delete') => {
+    userActionMutation.mutate({ userId, action
+    });
   };
 
-  const handleSkillAction = async (skillId: number, action: 'approve' | 'reject' | 'delete') => {
-    try {
-      if (action === 'delete') {
-        await adminService.deleteSkill(skillId);
-        setSkills(skills.filter(s => s.id !== skillId));
-        const statsData = await adminService.getAdminStats();
-        setStats(statsData);
+  const skillActionMutation = useMutation({
+    mutationFn: async ({ skillId, action
+    }: { skillId: number; action: 'approve' | 'reject' | 'delete'
+    }) => {
+      try {
+        if (action === 'delete') {
+          await adminService.deleteSkill(skillId);
+        } else {
+          await adminService.updateSkillStatus(skillId, action === 'approve' ? 'active' : 'rejected');
+        }
+      } catch (error: any) {
+        if (error?.response?.status === 401) {
+          showToast('Your session has expired. Please log in again.', 'error');
+          logoutAdmin();
+          navigate('/admin/login');
+        } else {
+          throw error;
+        }
+      }
+    },
+    onSuccess: (_, variables) => {
+      showActionResult(variables.action,
+      true, 'skill');
+      skillsQuery.refetch();
+      statsQuery.refetch();
+    },
+    onError: (error: any, variables) => {
+      if (error?.response?.status === 403) {
+        showActionResult(`${variables.action
+        } (not authorized)`,
+        false, 'skill');
       } else {
-        await adminService.updateSkillStatus(skillId, action === 'approve' ? 'active' : 'rejected');
-        setSkills(skills.map(skill =>
-          skill.id === skillId
-            ? { ...skill, status: action === 'approve' ? 'active' : 'rejected', lastModified: new Date().toISOString()
-        }
-            : skill
-        ));
-        const statsData = await adminService.getAdminStats();
-        setStats(statsData);
+        showActionResult(variables.action,
+        false, 'skill');
       }
-    } catch (error) {
-      console.error('Error handling skill action:', error);
     }
+  });
+
+  const handleSkillAction = (skillId: number, action: 'approve' | 'reject' | 'delete') => {
+    skillActionMutation.mutate({ skillId, action
+    });
   };
 
-  const handleMessageAction = async (messageId: number, action: 'read' | 'archive' | 'delete' | 'reply') => {
-    try {
-      if (action === 'reply') {
-        await adminService.replyToMessage(messageId, 'Admin', replyContent);
-        setMessages(messages.map(msg => 
-          msg.id === messageId 
-            ? { 
-                ...msg, 
-                status: 'read',
-                reply: {
-                  id: Date.now(),
-                  messageId,
-                  adminName: 'Admin',
-                  content: replyContent,
-                  createdAt: new Date().toISOString()
+  const messageActionMutation = useMutation({
+    mutationFn: async ({ messageId, action, content
+    }: { messageId: number; action: 'read' | 'archive' | 'delete' | 'reply'; content?: string
+    }) => {
+      try {
+        if (action === 'reply') {
+          if (!content?.trim()) {
+            throw new Error('Reply content cannot be empty');
           }
+          await adminService.replyToMessage(messageId, 'Admin', content);
+        } else if (action === 'delete') {
+          await adminService.deleteMessage(messageId);
+        } else {
+          await adminService.updateMessageStatus(messageId, action);
         }
-            : msg
-        ));
+      } catch (error: any) {
+        if (error?.response?.status === 401) {
+          showToast('Your session has expired. Please log in again.', 'error');
+          logoutAdmin();
+          navigate('/admin/login');
+        } else if (error?.message === 'Reply content cannot be empty') {
+          showToast('Please enter a reply message', 'error');
+        } else {
+          throw error;
+        }
+      }
+    },
+    onSuccess: (_, variables) => {
+      const action = variables.action === 'reply' ? 'sent reply to' : variables.action + 'd';
+      showActionResult(action,
+      true, 'message');
+      messagesQuery.refetch();
+      statsQuery.refetch();
+      if (variables.action === 'reply') {
         setReplyingTo(null);
         setReplyContent('');
-      } else if (action === 'delete') {
-        await adminService.deleteMessage(messageId);
-        setMessages(messages.filter(msg => msg.id !== messageId));
-      } else {
-        await adminService.updateMessageStatus(messageId, action);
-        setMessages(messages.map(msg => 
-          msg.id === messageId 
-            ? { ...msg, status: action
-        }
-            : msg
-        ));
       }
-      const statsData = await adminService.getAdminStats();
-      setStats(statsData);
-    } catch (error) {
-      console.error('Error handling message action:', error);
+    },
+    onError: (error: any, variables) => {
+      if (error?.message === 'Reply content cannot be empty') {
+        return; // Already handled in the try-catch
+      }
+      const action = variables.action === 'reply' ? 'send reply to' : variables.action;
+      showActionResult(action,
+      false, 'message');
     }
+  });
+
+  const handleMessageAction = (messageId: number, action: 'read' | 'archive' | 'delete' | 'reply') => {
+    messageActionMutation.mutate({ 
+      messageId, 
+      action,
+      content: action === 'reply' ? replyContent : undefined
+    });
   };
 
-  const updateSettings = async (newSettings: any) => {
-    try {
-      await adminService.updateSystemSettings(newSettings);
-      setSystemSettings(newSettings);
-    } catch (error) {
-      console.error('Error updating settings:', error);
+  const updateSettingsMutation = useMutation({
+    mutationFn: async (newSettings: any) => {
+      try {
+        if (newSettings.maintenanceMode && !window.confirm('Enabling maintenance mode will make the site inaccessible to users. Continue?')) {
+          return;
+        }
+        await adminService.updateSystemSettings(newSettings);
+      } catch (error: any) {
+        if (error?.response?.status === 401) {
+          showToast('Your session has expired. Please log in again.', 'error');
+          logoutAdmin();
+          navigate('/admin/login');
+        } else {
+          throw error;
+        }
+      }
+    },
+    onSuccess: (_, variables) => {
+      showToast(
+        variables.maintenanceMode 
+          ? 'Settings updated. Site is now in maintenance mode.' 
+          : 'Settings updated successfully',
+        'success'
+      );
+      settingsQuery.refetch();
+    },
+    onError: (error: any) => {
+      if (error?.response?.status === 403) {
+        showToast('You do not have permission to modify system settings.', 'error');
+      } else {
+        showToast('Failed to update settings. Please try again.', 'error');
+      }
     }
+  });
+
+  const updateSettings = (newSettings: any) => {
+    updateSettingsMutation.mutate(newSettings);
   };
 
   const handleLogout = () => {
@@ -169,8 +289,32 @@ const AdminDashboardPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Error Loading Dashboard</h3>
+          <p className="text-gray-500 dark:text-gray-400">Please try again later or contact support.</p>
+          <button
+            onClick={() => {
+              statsQuery.refetch();
+              skillsQuery.refetch();
+              messagesQuery.refetch();
+              settingsQuery.refetch();
+      }
+    }
+            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
@@ -193,13 +337,15 @@ const AdminDashboardPage = () => {
                   System Administrator
                 </span>
                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {adminProfile?.email || 'admin@skillswap.com'}
+                  {adminProfile?.email || 'admin@skillswap.com'
+  }
                 </span>
               </div>
               <div className="flex items-center border-l pl-4 border-gray-200 dark:border-gray-700">
                 <UserCircle className="h-10 w-10 text-indigo-500 dark:text-indigo-400" />
                 <button
-                  onClick={handleLogout}
+                  onClick={handleLogout
+  }
                   className="ml-2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
                   title="Logout"
                 >

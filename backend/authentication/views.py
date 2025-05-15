@@ -1,13 +1,21 @@
 from django.shortcuts import render
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework import status, viewsets
+from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from firebase_admin import auth
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from .firebase_config import initialize_firebase
+from .models import UserProfile, Skill, Message, MessageReply, SystemSettings
+from .serializers import (
+    UserManagementSerializer,
+    SkillModerationSerializer,
+    MessageSerializer,
+    SystemSettingsSerializer
+)
 
 initialize_firebase()
 
@@ -292,3 +300,120 @@ def google_auth(request):
             'status': 'error',
             'message': str(e)
         }, status=500)
+
+# Admin views
+class IsAdmin:
+    def has_permission(self, request, view):
+        try:
+            return bool(request.user and request.user.userprofile.is_admin)
+        except UserProfile.DoesNotExist:
+            return False
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsAdmin])
+def admin_stats(request):
+    total_users = User.objects.count()
+    active_users = User.objects.filter(is_active=True).count()
+    total_skills = Skill.objects.count()
+    pending_skills = Skill.objects.filter(status='pending').count()
+    new_messages = Message.objects.filter(status='new').count()
+    
+    stats = {
+        'totalUsers': total_users,
+        'activeUsers': active_users,
+        'totalSkills': total_skills,
+        'pendingSkills': pending_skills,
+        'newMessages': new_messages,
+        'systemHealth': {
+            'status': 'healthy',
+            'lastChecked': '2025-05-15T00:00:00Z',
+            'issues': 0
+        }
+    }
+    return Response(stats)
+
+class UserManagementViewSet(viewsets.ModelViewSet):
+    serializer_class = UserManagementSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+    
+    def get_queryset(self):
+        return User.objects.all()
+    
+    def partial_update(self, request, pk=None):
+        user = get_object_or_404(User, pk=pk)
+        status = request.data.get('status')
+        
+        if status == 'active':
+            user.is_active = True
+        elif status == 'suspended':
+            user.is_active = False
+        
+        user.save()
+        return Response(status=status.HTTP_200_OK)
+
+class SkillModerationViewSet(viewsets.ModelViewSet):
+    serializer_class = SkillModerationSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+    
+    def get_queryset(self):
+        return Skill.objects.all()
+    
+    def partial_update(self, request, pk=None):
+        skill = get_object_or_404(Skill, pk=pk)
+        status = request.data.get('status')
+        
+        if status in ['active', 'rejected']:
+            skill.status = status
+            skill.save()
+        
+        return Response(status=status.HTTP_200_OK)
+
+class MessageViewSet(viewsets.ModelViewSet):
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+    
+    def get_queryset(self):
+        return Message.objects.all()
+    
+    def partial_update(self, request, pk=None):
+        message = get_object_or_404(Message, pk=pk)
+        status = request.data.get('status')
+        
+        if status in ['read', 'archived']:
+            message.status = status
+            message.save()
+        
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'])
+    def reply(self, request, pk=None):
+        message = get_object_or_404(Message, pk=pk)
+        content = request.data.get('content')
+        
+        reply = MessageReply.objects.create(
+            message=message,
+            admin=request.user,
+            content=content
+        )
+        message.status = 'read'
+        message.save()
+        
+        return Response(status=status.HTTP_201_CREATED)
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated, IsAdmin])
+def system_settings(request):
+    settings = SystemSettings.objects.first()
+    if not settings:
+        settings = SystemSettings.objects.create()
+    
+    if request.method == 'GET':
+        serializer = SystemSettingsSerializer(settings)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = SystemSettingsSerializer(settings, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
