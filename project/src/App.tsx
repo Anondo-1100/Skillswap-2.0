@@ -4,6 +4,10 @@ import { BrowserRouter as Router, Routes, Route
 } from 'react-router-dom';
 import { ThemeProvider
 } from './contexts/ThemeContext';
+import { AuthProvider
+} from './contexts/AuthContext';
+import { AdminAuthProvider
+} from './contexts/AdminAuthContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import HomePage from './pages/HomePage';
@@ -50,40 +54,44 @@ function App() {
   }
 
   return (
-    <ThemeProvider>
-      <Router>
-        <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-          <Header />
-          <main className="flex-grow">
-            <Routes>
-              <Route path="/" element={<HomePage />
+    <AuthProvider>
+      <ThemeProvider>
+        <Router>
+          <AdminAuthProvider>
+            <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+              <Header />
+              <main className="flex-grow">
+                <Routes>
+                  <Route path="/" element={<HomePage />
   } />
-              <Route path="/skills" element={<SkillsPage />
+                  <Route path="/skills" element={<SkillsPage />
   } />
-              <Route path="/skills/:id" element={<SkillPage />
+                  <Route path="/skills/:id" element={<SkillPage />
   } />
-              <Route path="/search" element={<SearchPage />
+                  <Route path="/search" element={<SearchPage />
   } />
-              <Route path="/profile/:id" element={<ProfilePage />
+                  <Route path="/profile/:id" element={<ProfilePage />
   } />
-              <Route path="/login" element={<LoginPage />
+                  <Route path="/login" element={<LoginPage />
   } />
-              <Route path="/register" element={<RegisterPage />
+                  <Route path="/register" element={<RegisterPage />
   } />
-              <Route path="/contact" element={<ContactPage />
+                  <Route path="/contact" element={<ContactPage />
   } />
-              <Route path="/admin/login" element={<AdminLoginPage />
+                  <Route path="/admin/login" element={<AdminLoginPage />
   } />
-              <Route path="/admin/dashboard" element={<AdminDashboardPage />
+                  <Route path="/admin/dashboard" element={<AdminDashboardPage />
   } />
-              <Route path="*" element={<NotFoundPage />
+                  <Route path="*" element={<NotFoundPage />
   } />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
-    </ThemeProvider>
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          </AdminAuthProvider>
+        </Router>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

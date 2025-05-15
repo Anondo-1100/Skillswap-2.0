@@ -4,13 +4,12 @@ import { useNavigate
 } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail
 } from 'lucide-react';
-
-const ADMIN_CREDENTIALS = {
-  email: 'admin@skillswap.com',
-  password: 'admin123',
-};
+import { useAdminAuth
+} from '../contexts/AdminAuthContext';
 
 const AdminLoginPage = () => {
+  const { loginAdmin
+  } = useAdminAuth();
   const navigate = useNavigate();
   const [email, setEmail
   ] = useState('');
@@ -34,17 +33,14 @@ const AdminLoginPage = () => {
     setError('');
     setIsLoading(true);
 
-    // Simulate authentication delay
-    setTimeout(() => {
-      if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-        localStorage.setItem('isAdminLoggedIn', 'true');
-        navigate('/admin/dashboard'); // You'll need to create an admin dashboard
-      } else {
-        setError('Invalid admin credentials');
-      }
+    try {
+      await loginAdmin(email, password);
+      navigate('/admin/dashboard');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Invalid admin credentials');
+    } finally {
       setIsLoading(false);
-    },
-    1000);
+    }
   };
 
   return (

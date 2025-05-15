@@ -4,15 +4,19 @@ import { useNavigate, Link
 } from 'react-router-dom';
 import {
   Users, BookOpen, Settings, Activity,
-  Shield, Ban, Check, X, RefreshCw, MessageSquare, Archive, Trash2, Send
+  Shield, Ban, Check, X, RefreshCw, MessageSquare, Archive, Trash2, Send, LogOut, UserCircle
 } from 'lucide-react';
 import { adminService
 } from '../services/adminService';
 import { AdminStats, UserManagement, SkillModeration, UserMessage
 } from '../types/admin';
+import { useAdminAuth
+} from '../contexts/AdminAuthContext';
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
+  const { adminProfile, logoutAdmin
+  } = useAdminAuth();
   const [activeTab, setActiveTab
   ] = useState<'overview' | 'users' | 'skills' | 'messages' | 'settings'>('overview');
   const [stats, setStats
@@ -33,14 +37,13 @@ const AdminDashboardPage = () => {
   ] = useState('');
 
   useEffect(() => {
-    const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
-    if (!isAdminLoggedIn) {
+    if (!adminProfile) {
       navigate('/admin/login');
       return;
     }
     loadData();
   },
-  [navigate
+  [navigate, adminProfile
   ]);
 
   const loadData = async () => {
@@ -159,6 +162,11 @@ const AdminDashboardPage = () => {
     }
   };
 
+  const handleLogout = () => {
+    logoutAdmin();
+    navigate('/admin/login');
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -170,10 +178,36 @@ const AdminDashboardPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
-        { /* Admin Header */}
+        { /* Admin Header with Profile */}
         <div className="mb-8">
-          <h1 className="font-bold text-gray-900 dark:text-white text-3xl">Admin Dashboard</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Manage your platform and users</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="font-bold text-gray-900 dark:text-white text-3xl">Admin Dashboard</h1>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">Manage your platform and users</p>
+            </div>
+
+            { /* Admin Profile Section */}
+            <div className="flex items-center gap-4 bg-white dark:bg-gray-800 rounded-lg px-4 py-2 shadow-sm transition-all duration-200 hover:shadow-md">
+              <div className="flex flex-col items-end">
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  System Administrator
+                </span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  {adminProfile?.email || 'admin@skillswap.com'}
+                </span>
+              </div>
+              <div className="flex items-center border-l pl-4 border-gray-200 dark:border-gray-700">
+                <UserCircle className="h-10 w-10 text-indigo-500 dark:text-indigo-400" />
+                <button
+                  onClick={handleLogout}
+                  className="ml-2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                  title="Logout"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         { /* Navigation Tabs */}
@@ -192,23 +226,23 @@ const AdminDashboardPage = () => {
       { id: 'settings', name: 'Settings', icon: Settings
       }
     ].map((tab) => (
-                <button
-                  key={tab.id
+              <button
+                key={tab.id
     }
-                  onClick={() => setActiveTab(tab.id as any)
+                onClick={() => setActiveTab(tab.id as any)
     }
-                  className={`${
-                    activeTab === tab.id
-                      ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                className={`${
+                  activeTab === tab.id
+                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
       } flex items-center py-4 px-1 border-b-2 font-medium text-sm`
     }
-                >
-                  <tab.icon className="mr-2 h-5 w-5" />
-                  {tab.name
+              >
+                <tab.icon className="mr-2 h-5 w-5" />
+                {tab.name
     }
-                </button>
-              ))
+              </button>
+            ))
   }
           </nav>
         </div>
